@@ -113,6 +113,9 @@ def evaluate_all_events(events, lanes):
     used_male_ids = set()
 
     for i, e1 in enumerate(events):
+        if e1["Gender"] in ("Boys", "Men") and e1["Event #"] in used_male_ids:
+            continue  # already paired and added
+
         row = e1.copy()
 
         # Only female events initiate a combo
