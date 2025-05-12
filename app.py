@@ -1,7 +1,12 @@
 from flask import Flask, render_template, request, send_file, redirect, url_for
 import os
 from datetime import datetime
-from parse_utils import extract_events_from_pdf, find_combinable_pairs, export_pairs_to_pdf, export_pairs_to_csv
+from parse_utils import (
+    extract_events_from_pdf,
+    evaluate_all_events,
+    export_pairs_to_pdf,
+    export_pairs_to_csv
+)
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "static/generated"
@@ -13,7 +18,6 @@ def home():
 
 @app.route("/combo-generator", methods=["GET", "POST"])
 def combo_generator():
-    events = []
     table = []
     meet_title = ""
     csv_path = pdf_path = None
@@ -21,7 +25,7 @@ def combo_generator():
 
     if request.method == "POST":
         uploaded_file = request.files.get("pdf")
-        lanes = int(request.form.get("lanes"))
+        lanes = int(request.form.get("lanes", 6))
 
         if uploaded_file and uploaded_file.filename.endswith(".pdf"):
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -32,14 +36,13 @@ def combo_generator():
             events, meet_title = extract_events_from_pdf(filepath)
             table = evaluate_all_events(events, lanes)
 
-            # export files
             csv_path = os.path.join(UPLOAD_FOLDER, f"combinable_{timestamp}.csv")
             pdf_path = os.path.join(UPLOAD_FOLDER, f"combinable_{timestamp}.pdf")
             export_pairs_to_csv(table, csv_path)
             export_pairs_to_pdf(table, pdf_path, meet_title)
 
             return render_template(
-                "index.html",
+                "combo.html",
                 meet_title=meet_title,
                 table=table,
                 lanes=lanes,
@@ -54,4 +57,5 @@ def download(filename):
     return send_file(os.path.join(UPLOAD_FOLDER, filename), as_attachment=True)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
