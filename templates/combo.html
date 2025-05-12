@@ -21,22 +21,27 @@
 </head>
 <body>
 <h2>Event Combo Generator</h2>
+<p>
+    Use Chrome or Firefox to export a session report from Meet Maestro.<br>
+    (Settings -> Reports -> Session Report -> Print -> Save to PDF)<br>
+    <u>Do not</u> use Edge, Safari, or the "Microsoft Print to PDF" printer.
+</p>
 <form action="/combo-generator" method="post" enctype="multipart/form-data">
     <label for="pdf">PDF File:</label>
-    <input type="file" name="pdf" accept=".pdf" required>
+    <input type="file" name="pdf" accept=".pdf" required><br>
     <label for="lanes">Lanes:</label>
     <select name="lanes" required>
         {% for l in range(4, 9) %}
         <option value="{{ l }}" {% if lanes == l %}selected{% endif %}>{{ l }}</option>
         {% endfor %}
-    </select>
+    </select><br>
     <button type="submit">Process</button>
 </form>
 
 {% if table %}
 <hr>
 <h3>{{ meet_title }}</h3>
-<p><strong>Total combo events: {{ combo_count }}</strong></p>
+<p><strong>Total combo event pairs: {{ combo_count }}</strong></p>
 <p>
     Combos only: <a href="{{ url_for('download', filename=csv_filename) }}">Download CSV</a> |
     <a href="{{ url_for('download', filename=pdf_filename) }}">Download PDF</a>
