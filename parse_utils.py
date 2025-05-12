@@ -68,6 +68,45 @@ def extract_events_from_pdf(pdf_path):
 
     return events, meet_title
 
+def find_combinable_pairs(events, lanes=6):
+    pairs = []
+    for i, e1 in enumerate(events):
+        if e1["Gender"] not in ("Girls", "Women") or e1["Entries"] < 1:
+            continue
+
+        for e2 in events[i + 1:]:
+            if e2["Gender"] not in ("Boys", "Men") or e2["Entries"] < 1:
+                continue
+
+            if (
+                e1["Age Group"] == e2["Age Group"]
+                and e1["Distance"] == e2["Distance"]
+                and e1["Stroke"] == e2["Stroke"]
+            ):
+                r1 = e1["Entries"] % lanes
+                r2 = e2["Entries"] % lanes
+
+                if r1 == 0 or r2 == 0:
+                    continue
+                if r1 + r2 > lanes:
+                    continue
+
+                pairs.append({
+                    "Female Event #": e1["Event #"],
+                    "Female Age": f"{e1['Gender']} {e1['Age Group']}",
+                    "Female Heat #": e1["Heats"],
+                    "Female # Swimmers": r1,
+                    "combine with": "combine with",
+                    "Male Event #": e2["Event #"],
+                    "Male Age": f"{e2['Gender']} {e2['Age Group']}",
+                    "Male Heat #": 1,
+                    "Male # Swimmers": r2,
+                    "Distance": e1["Distance"],
+                    "Stroke": e1["Stroke"]
+                })
+
+    return pairs
+
 def evaluate_all_events(events, lanes):
     result = []
     for i, e1 in enumerate(events):
