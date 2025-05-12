@@ -62,11 +62,13 @@
     {% for row in table %}
     <tr class="
         {% if row['Can Combine?'] == 'Yes' %}highlight
-        {% elif row['Highlight As'] == 'partner' %}partner
+        {% elif row['_highlight_partner'] %}partner
         {% endif %}
     ">
-        {% for val in row.values() %}
-        <td>{{ val }}</td>
+        {% for key, val in row.items() %}
+            {% if not key.startswith('_') %}
+                <td>{{ val }}</td>
+            {% endif %}
         {% endfor %}
     </tr>
     {% endfor %}
