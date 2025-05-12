@@ -157,10 +157,12 @@ def export_pairs_to_csv(pairs, csv_path, meet_title):
     central_time = datetime.now(ZoneInfo("America/Chicago"))
     timestamp = central_time.strftime("Report generated %m/%d/%Y %I:%M:%S %p")
 
+    safe_title = meet_title.replace(",", "")
+
     with open(csv_path, "w", newline="") as f:
         # Top header
         f.write("Combo Events\n")
-        f.write(f"{meet_title}\n")
+        f.write(f"{safe_title}\n")
         f.write("\n")
 
         # Column headers
