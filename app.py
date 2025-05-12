@@ -4,6 +4,7 @@ from datetime import datetime
 from parse_utils import (
     extract_events_from_pdf,
     evaluate_all_events,
+    find_combinable_pairs,
     export_pairs_to_pdf,
     export_pairs_to_csv
 )
