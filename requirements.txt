@@ -2,3 +2,4 @@ flash
 pdfplumber
 fpdf2
 pandas
+gunicorn
