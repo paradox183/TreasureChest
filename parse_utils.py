@@ -147,9 +147,32 @@ def evaluate_all_events(events, lanes):
         result.append(row)
     return result
 
-def export_pairs_to_csv(pairs, csv_path):
+def export_pairs_to_csv(pairs, csv_path, meet_title):
+    if not pairs:
+        return
+
     df = pd.DataFrame(pairs)
-    df.to_csv(csv_path, index=False)
+    headers = df.columns.tolist()
+
+    central_time = datetime.now(ZoneInfo("America/Chicago"))
+    timestamp = central_time.strftime("Report generated %m/%d/%Y %I:%M:%S %p")
+
+    with open(csv_path, "w", newline="") as f:
+        # Top header
+        f.write("Combo Events\n")
+        f.write(f"{meet_title}\n")
+        f.write("\n")
+
+        # Column headers
+        f.write(",".join(headers) + "\n")
+
+        # Data rows
+        for _, row in df.iterrows():
+            f.write(",".join([str(row[col]) for col in headers]) + "\n")
+
+        # Footer
+        f.write("\n")
+        f.write(f"{timestamp}\n")
 
 def export_pairs_to_pdf(pairs, pdf_path, meet_title):
     pdf = FPDF(orientation='L')
