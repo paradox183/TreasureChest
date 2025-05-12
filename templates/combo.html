@@ -27,15 +27,15 @@
     <u>Do not</u> use Edge, Safari, or the "Microsoft Print to PDF" printer.
 </p>
 <form action="/combo-generator" method="post" enctype="multipart/form-data">
-    <label for="pdf">PDF File:</label>
-    <input type="file" name="pdf" accept=".pdf" required><br>
-    <label for="lanes">Lanes:</label>
+    <p><label for="pdf">PDF File:</label>
+    <input type="file" name="pdf" accept=".pdf" required></p>
+   <p><label for="lanes">Lanes:</label>
     <select name="lanes" required>
         {% for l in range(4, 9) %}
         <option value="{{ l }}" {% if lanes == l %}selected{% endif %}>{{ l }}</option>
         {% endfor %}
-    </select><br>
-    <button type="submit">Process</button>
+    </select></p>
+    <p><button type="submit">Generate combos</button></p>
 </form>
 
 {% if table %}
