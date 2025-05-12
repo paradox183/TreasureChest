@@ -37,8 +37,8 @@ def combo_generator():
             events, meet_title = extract_events_from_pdf(filepath)
             table = evaluate_all_events(events, lanes)
 
-            csv_path = os.path.join(UPLOAD_FOLDER, f"combinable_{timestamp}.csv")
-            pdf_path = os.path.join(UPLOAD_FOLDER, f"combinable_{timestamp}.pdf")
+            csv_path = os.path.join(UPLOAD_FOLDER, f"combo_{timestamp}.csv")
+            pdf_path = os.path.join(UPLOAD_FOLDER, f"combo_{timestamp}.pdf")
             combinable_only = find_combinable_pairs(events, lanes)
             combo_count = len(combinable_only)
             export_pairs_to_csv(combinable_only, csv_path, meet_title)
