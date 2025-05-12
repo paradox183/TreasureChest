@@ -232,7 +232,7 @@ def export_pairs_to_pdf(pairs, pdf_path, meet_title):
             pdf.cell(col_widths[i], 8, text, border=1, fill=fill)
         pdf.ln()
 
-    # Add timestamp centered below the table
+    # Add timestamp centered below the table, in CDT
     pdf.set_font("Helvetica", size=7)
     local_time = datetime.now(ZoneInfo("America/Chicago"))
     timestamp = local_time.strftime("Report generated %m/%d/%Y %I:%M:%S %p")
