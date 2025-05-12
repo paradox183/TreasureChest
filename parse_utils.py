@@ -114,7 +114,6 @@ def evaluate_all_events(events, lanes):
 
     for i, e1 in enumerate(events):
         row = e1.copy()
-        row["Highlight As"] = ""
 
         # Only female events initiate a combo
         if e1["Gender"] not in ("Girls", "Women"):
@@ -154,15 +153,16 @@ def evaluate_all_events(events, lanes):
         else:
             row["Can Combine?"] = "Yes"
             row["Why Not?"] = ""
+            used_male_ids.add(matching["Event #"])
 
-            # Mark the matching male row as "partner"
+            # Append female row first
+            result.append(row)
+
+            # Now insert a silent highlight flag in male row (not shown in table)
             male_row = matching.copy()
             male_row["Can Combine?"] = ""
             male_row["Why Not?"] = ""
-            male_row["Highlight As"] = "partner"
-            used_male_ids.add(matching["Event #"])
-
-            result.append(row)
+            male_row["_highlight_partner"] = True  # internal only
             result.append(male_row)
             continue
 
