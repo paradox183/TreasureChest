@@ -151,46 +151,91 @@ def export_pairs_to_csv(pairs, csv_path):
     df.to_csv(csv_path, index=False)
 
 def export_pairs_to_pdf(pairs, pdf_path, meet_title):
-    headers = list(pairs[0].keys()) if pairs else []
-    col_widths = [max(20, len(h) * 3) for h in headers]
-
     pdf = FPDF(orientation='L')
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
+    # Centered title
     pdf.set_font("Helvetica", "B", 12)
+    from fpdf.enums import XPos, YPos
+
     pdf.cell(0, 10, "Combo Events", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
     pdf.cell(0, 8, meet_title, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
-    pdf.ln(4)
 
-    # Headers
-    gray = (204, 204, 204)
+    pdf.ln(4)  # Small space before table
+
+    pdf.set_font("Helvetica", size=10)
+
+    # Table column headers
+    headers = [
+        "Female\nEvent #", "Female\nAge", "Female\nHeat #", "Female\n# Swimmers",
+        "combine\nwith",
+        "Male\nEvent #", "Male\nAge", "Male\nHeat #", "Male\n# Swimmers",
+        "Distance\n ", "Stroke\n "
+    ]
+
+    data_keys = [
+        "Female Event #", "Female Age", "Female Heat #", "Female # Swimmers",
+        "combine with",
+        "Male Event #", "Male Age", "Male Heat #", "Male # Swimmers",
+        "Distance", "Stroke"
+    ]
+
+    # Column widths (adjust as needed)
+    col_widths = [20, 27, 20, 25, 25, 20, 27, 20, 25, 20, 30]
+    table_width = sum(col_widths)
+
+    gray_fill = (235, 235, 235)  # RGB for #CCCCCC
+
+    # Draw header row
     pdf.set_font("Helvetica", "B", 10)
-    pdf.set_fill_color(*gray)
-    x_start = (pdf.w - sum(col_widths)) / 2
-    pdf.set_x(x_start)
-    for i, header in enumerate(headers):
-        pdf.rect(pdf.get_x(), pdf.get_y(), col_widths[i], 8, style='F')
-        pdf.multi_cell(col_widths[i], 4, header, border=1, align="C",
-                       new_x=XPos.RIGHT, new_y=YPos.TOP, max_line_height=4)
-    pdf.ln(8)
+    pdf.set_x((pdf.w - table_width) / 2)
+    y_start = pdf.get_y()
+    x_start = pdf.get_x()
 
-    # Rows
+    from fpdf.enums import XPos, YPos
+
+    for i, header in enumerate(headers):
+        col_width = col_widths[i]
+        # Draw filled rectangle behind header
+        pdf.set_fill_color(*gray_fill)
+        pdf.rect(x_start, y_start, col_width, 8, style='F')
+        pdf.set_x((pdf.w - table_width) / 2)
+
+        # Then write the header text (can be multi-line)
+        pdf.set_xy(x_start, y_start)
+        pdf.multi_cell(
+            col_width, 4, header,
+            border=1, align="C",
+            new_x=XPos.RIGHT, new_y=YPos.TOP,
+            max_line_height=4
+        )
+        x_start += col_width
+
+    pdf.ln(8)  # Adjust spacing below header row
+
+    # Draw each row
     pdf.set_font("Helvetica", size=9)
     for row in pairs:
-        pdf.set_x(x_start)
-        for i, key in enumerate(headers):
+        pdf.set_x((pdf.w - table_width) / 2)
+        for i, key in enumerate(data_keys):
             text = str(row[key])
-            fill = key in ("combine with", "Distance", "Stroke")
-            if fill:
-                pdf.set_fill_color(*gray)
+
+            # Determine if this column should have gray fill
+            if key in ["combine with", "Distance", "Stroke"]:
+                pdf.set_fill_color(*gray_fill)
+                fill = True
+            else:
+                fill = False
+
             pdf.cell(col_widths[i], 8, text, border=1, fill=fill)
         pdf.ln()
 
-    # Timestamp
-    pdf.set_font("Helvetica", size=6)
-    pdf.ln(4)
+    # Add timestamp centered below the table
+    pdf.set_font("Helvetica", size=7)
     timestamp = datetime.now().strftime("Report generated %m/%d/%Y %I:%M:%S %p")
+    pdf.ln(4)
     pdf.cell(0, 5, timestamp, align="C")
 
     pdf.output(pdf_path)
+    print(f"📄 Exported {len(pairs)} combinable pairs to '{pdf_path}'")
