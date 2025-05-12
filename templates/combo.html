@@ -17,6 +17,9 @@
         .highlight {
             background-color: rgb(197, 227, 188);
         }
+        .partner {
+            background-color: rgb(222, 247, 222);
+        }
     </style>
 </head>
 <body>
@@ -57,7 +60,11 @@
     </thead>
     <tbody>
     {% for row in table %}
-    <tr class="{% if row['Can Combine?'] == 'Yes' %}highlight{% endif %}">
+    <tr class="
+        {% if row['Can Combine?'] == 'Yes' %}highlight
+        {% elif row['Highlight As'] == 'partner' %}partner
+        {% endif %}
+    ">
         {% for val in row.values() %}
         <td>{{ val }}</td>
         {% endfor %}

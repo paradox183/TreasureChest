@@ -110,41 +110,64 @@ def find_combinable_pairs(events, lanes=6):
 
 def evaluate_all_events(events, lanes):
     result = []
+    used_male_ids = set()
+
     for i, e1 in enumerate(events):
         row = e1.copy()
+        row["Highlight As"] = ""
+
+        # Only female events initiate a combo
         if e1["Gender"] not in ("Girls", "Women"):
             row["Can Combine?"] = ""
             row["Why Not?"] = ""
             result.append(row)
             continue
 
-        matching = next((e2 for e2 in events[i+1:]
-                         if e2["Gender"] in ("Boys", "Men") and
-                         e2["Age Group"] == e1["Age Group"] and
-                         e2["Distance"] == e1["Distance"] and
-                         e2["Stroke"] == e1["Stroke"]), None)
+        matching = next(
+            (e2 for e2 in events[i + 1:]
+             if e2["Gender"] in ("Boys", "Men")
+             and e2["Age Group"] == e1["Age Group"]
+             and e2["Distance"] == e1["Distance"]
+             and e2["Stroke"] == e1["Stroke"]
+             and e2["Event #"] not in used_male_ids),
+            None
+        )
 
         if not matching:
             row["Can Combine?"] = "No"
             row["Why Not?"] = "No male counterpart"
-        else:
-            r1 = e1["Entries"] % lanes
-            r2 = matching["Entries"] % lanes
+            result.append(row)
+            continue
 
-            if e1["Entries"] < 1 or matching["Entries"] < 1:
-                row["Can Combine?"] = "No"
-                row["Why Not?"] = "One event has 0 entries"
-            elif r1 == 0 or r2 == 0:
-                row["Can Combine?"] = "No"
-                row["Why Not?"] = "One event fills all lanes"
-            elif r1 + r2 > lanes:
-                row["Can Combine?"] = "No"
-                row["Why Not?"] = "Too many remainder swimmers"
-            else:
-                row["Can Combine?"] = "Yes"
-                row["Why Not?"] = ""
+        r1 = e1["Entries"] % lanes
+        r2 = matching["Entries"] % lanes
+
+        if e1["Entries"] < 1 or matching["Entries"] < 1:
+            row["Can Combine?"] = "No"
+            row["Why Not?"] = "One event has 0 entries"
+        elif r1 == 0 or r2 == 0:
+            row["Can Combine?"] = "No"
+            row["Why Not?"] = "One event fills all lanes"
+        elif r1 + r2 > lanes:
+            row["Can Combine?"] = "No"
+            row["Why Not?"] = "Too many remainder swimmers"
+        else:
+            row["Can Combine?"] = "Yes"
+            row["Why Not?"] = ""
+
+            # Mark the matching male row as "partner"
+            male_row = matching.copy()
+            male_row["Can Combine?"] = ""
+            male_row["Why Not?"] = ""
+            male_row["Highlight As"] = "partner"
+            used_male_ids.add(matching["Event #"])
+
+            result.append(row)
+            result.append(male_row)
+            continue
 
         result.append(row)
+
     return result
 
 def export_pairs_to_csv(pairs, csv_path, meet_title):
