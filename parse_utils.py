@@ -3,6 +3,7 @@ import pdfplumber
 import pandas as pd
 import re
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from fpdf import FPDF
 from fpdf.enums import XPos, YPos
 
@@ -233,6 +234,7 @@ def export_pairs_to_pdf(pairs, pdf_path, meet_title):
 
     # Add timestamp centered below the table
     pdf.set_font("Helvetica", size=7)
+    local_time = datetime.now(ZoneInfo("America/Chicago"))
     timestamp = datetime.now().strftime("Report generated %m/%d/%Y %I:%M:%S %p")
     pdf.ln(4)
     pdf.cell(0, 5, timestamp, align="C")
