@@ -40,6 +40,7 @@ def combo_generator():
             csv_path = os.path.join(UPLOAD_FOLDER, f"combinable_{timestamp}.csv")
             pdf_path = os.path.join(UPLOAD_FOLDER, f"combinable_{timestamp}.pdf")
             combinable_only = find_combinable_pairs(events, lanes)
+            combo_count = len(combinable_only)
             export_pairs_to_csv(combinable_only, csv_path, meet_title)
             export_pairs_to_pdf(combinable_only, pdf_path, meet_title)
 
@@ -49,7 +50,8 @@ def combo_generator():
                 table=table,
                 lanes=lanes,
                 csv_filename=os.path.basename(csv_path),
-                pdf_filename=os.path.basename(pdf_path)
+                pdf_filename=os.path.basename(pdf_path),
+                combo_count=combo_count
             )
 
     return render_template("combo.html")

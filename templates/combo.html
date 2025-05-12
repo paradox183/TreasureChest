@@ -34,9 +34,11 @@
 </form>
 
 {% if table %}
+<hr>
 <h3>{{ meet_title }}</h3>
+<p><strong>Total combo events: {{ combo_count }}</strong></p>
 <p>
-    <a href="{{ url_for('download', filename=csv_filename) }}">Download CSV</a> |
+    Combos only: <a href="{{ url_for('download', filename=csv_filename) }}">Download CSV</a> |
     <a href="{{ url_for('download', filename=pdf_filename) }}">Download PDF</a>
 </p>
 
