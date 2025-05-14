@@ -28,7 +28,8 @@
 </form>
 
 {% if label_data %}
-<h3>Generated Labels ({{ label_data|length }})</h3>
+<hr>
+<h3>Triple-Drops: {{ label_data|length }}</h3>
 
 <p>
     <a href="{{ url_for('download', filename=label_filename) }}">Download PDF Labels</a>
