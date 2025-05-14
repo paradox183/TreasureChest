@@ -28,15 +28,24 @@ class Avery5160LabelSheet(FPDF):
         x = self.margin_left + col * self.h_pitch
         y = self.margin_top + row * self.v_pitch
 
+        max_width = self.label_width
+
         # line_height = self.label_height / 5.0
         line_height = 0.16
-        max_chars = 40
+        # max_chars = 40
         for i, text in enumerate(lines[:5]):
             clean_text = text.strip()
-            if len(clean_text) > max_chars:
-                clean_text = clean_text[:max_chars - 3] + "..."
+
+            # Truncate based on actual string width
+            while self.get_string_width(clean_text) > max_width:
+                clean_text = clean_text[:-1]
+                if len(clean_text) <= 3:
+                    break
+            if self.get_string_width(clean_text) > max_width:
+                clean_text = clean_text[:max(0, len(clean_text) - 3)] + "..."
+
             self.set_xy(x, y + i * line_height)
-            self.cell(self.label_width, line_height, text, ln=0)
+            self.cell(self.label_width, line_height, clean_text, ln=0)
 
         self.current_label_index += 1
 
