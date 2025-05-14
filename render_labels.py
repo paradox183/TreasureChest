@@ -28,7 +28,8 @@ class Avery5160LabelSheet(FPDF):
         x = self.margin_left + col * self.h_pitch
         y = self.margin_top + row * self.v_pitch
 
-        line_height = self.label_height / 5.0
+        # line_height = self.label_height / 5.0
+        line_height = 0.16
         max_chars = 40
         for i, text in enumerate(lines[:5]):
             clean_text = text.strip()
