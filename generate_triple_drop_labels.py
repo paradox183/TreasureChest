@@ -26,19 +26,20 @@ def generate_triple_drop_labels(report_csv_path):
     date_col = f"{meet_prefix}-Date"
     name_col = f"{meet_prefix}-Name"
 
-    # Step 2: filter only TRUE improvements with prior valid times
+    # Step 2: filter TRUE improvements with prior valid times
     filtered_rows = []
+    last_index = result_sec_cols.index(last_valid_result_col)
+
     for _, row in report_df.iterrows():
         if not row.get(improved_col, False):
             continue
 
-        # Check if swimmer had valid previous ResultSec values
+        # Check earlier ResultSec columns only by index
         prev_results = [
             pd.to_numeric(row[col], errors='coerce')
-            for col in result_sec_cols
-            if col < last_valid_result_col
+            for col in result_sec_cols[:last_index]
         ]
-        prior_valid_times = [time for time in prev_results if pd.notna(time)]
+        prior_valid_times = [val for val in prev_results if pd.notna(val)]
 
         if prior_valid_times:
             filtered_rows.append(row)
