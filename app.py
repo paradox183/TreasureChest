@@ -8,6 +8,8 @@ from parse_utils import (
     export_pairs_to_pdf,
     export_pairs_to_csv
 )
+from generate_triple_drop_labels import generate_triple_drop_labels
+from render_labels import render_label_pdf
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "static/generated"
@@ -55,6 +57,31 @@ def combo_generator():
             )
 
     return render_template("combo.html")
+
+@app.route("/triple-drop-labels", methods=["GET", "POST"])
+def triple_drop_labels():
+    label_data = []
+    label_filename = ""
+
+    if request.method == "POST":
+        uploaded_file = request.files.get("report")
+        if uploaded_file and uploaded_file.filename.endswith(".csv"):
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            saved_path = os.path.join(UPLOAD_FOLDER, f"report_{timestamp}.csv")
+            uploaded_file.save(saved_path)
+
+            label_data = generate_triple_drop_labels(saved_path)
+
+            if label_data:
+                label_filename = f"triple_labels_{timestamp}.pdf"
+                output_path = os.path.join(UPLOAD_FOLDER, label_filename)
+                render_label_pdf(label_data, output_path)
+
+    return render_template(
+        "triple_drop.html",
+        label_data=label_data,
+        label_filename=label_filename
+    )
 
 @app.route("/download/<filename>")
 def download(filename):
