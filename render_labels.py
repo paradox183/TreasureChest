@@ -13,7 +13,7 @@ class Avery5160LabelSheet(FPDF):
         self.h_pitch = 2.75
         self.v_pitch = 1.0
         self.labels_per_page = self.labels_per_row * self.labels_per_column
-        self.set_font("Helvetica", size=10)
+        self.set_font("Helvetica", size=8)
         self.current_label_index = 0
         self.add_page()
 
@@ -29,7 +29,11 @@ class Avery5160LabelSheet(FPDF):
         y = self.margin_top + row * self.v_pitch
 
         line_height = self.label_height / 5.0
+        max_chars = 40
         for i, text in enumerate(lines[:5]):
+            clean_text = text.strip()
+            if len(clean_text) > max_chars:
+                clean_text = clean_text[:max_chars - 3] + "..."
             self.set_xy(x, y + i * line_height)
             self.cell(self.label_width, line_height, text, ln=0)
 
