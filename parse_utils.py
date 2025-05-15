@@ -178,7 +178,7 @@ def export_pairs_to_csv(pairs, csv_path, meet_title):
         return
 
     df = pd.DataFrame(pairs)
-    headers = df.columns.tolist()
+    headers = [col for col in df.columns if col not in ("Female # Swimmers", "Male # Swimmers")]
 
     central_time = datetime.now(ZoneInfo("America/Chicago"))
     timestamp = central_time.strftime("Report generated %m/%d/%Y %I:%M:%S %p")
@@ -220,21 +220,21 @@ def export_pairs_to_pdf(pairs, pdf_path, meet_title):
 
     # Table column headers
     headers = [
-        "Female\nEvent #", "Female\nAge", "Female\nHeat #", "Female\n# Swimmers",
+        "Female\nEvent #", "Female\nAge", "Female\nHeat #",
         "combine\nwith",
-        "Male\nEvent #", "Male\nAge", "Male\nHeat #", "Male\n# Swimmers",
+        "Male\nEvent #", "Male\nAge", "Male\nHeat #",
         "Distance\n ", "Stroke\n "
     ]
 
     data_keys = [
-        "Female Event #", "Female Age", "Female Heat #", "Female # Swimmers",
+        "Female Event #", "Female Age", "Female Heat #",
         "combine with",
-        "Male Event #", "Male Age", "Male Heat #", "Male # Swimmers",
+        "Male Event #", "Male Age", "Male Heat #",
         "Distance", "Stroke"
     ]
 
     # Column widths (adjust as needed)
-    col_widths = [20, 27, 20, 25, 25, 20, 27, 20, 25, 20, 30]
+    col_widths = [20, 27, 20, 25, 20, 27, 20, 20, 30]
     table_width = sum(col_widths)
 
     gray_fill = (235, 235, 235)  # RGB for #CCCCCC
