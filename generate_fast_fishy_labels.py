@@ -112,4 +112,4 @@ def generate_fast_fishy_labels(report_csv_path):
                 m["meet"]
             ])
 
-    return labels
+    return labels, drops_df, full_rankings
