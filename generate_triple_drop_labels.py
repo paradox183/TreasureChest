@@ -1,3 +1,4 @@
+
 import pandas as pd
 import re
 
@@ -9,30 +10,60 @@ def clean_age_group(age_group):
 def generate_triple_drop_labels(report_csv_path):
     report_df = pd.read_csv(report_csv_path)
 
-    # Step 1: find the most recent ResultSec column with real data
+    # Identify meet numbers
     result_sec_cols = [col for col in report_df.columns if "ResultSec" in col]
-    last_valid_result_col = None
-    for col in reversed(result_sec_cols):
-        if pd.to_numeric(report_df[col], errors='coerce').notna().any():
-            last_valid_result_col = col
+    meet_numbers = sorted(set(col.split("-")[0] for col in result_sec_cols), key=lambda x: int(x.replace("Meet", "")))
+
+    # Identify the last meet with any data
+    last_meet = None
+    for meet in reversed(meet_numbers):
+        result_col = f"{meet}-ResultSec"
+        if pd.to_numeric(report_df[result_col], errors='coerce').notna().any():
+            last_meet = meet
             break
 
-    if not last_valid_result_col:
+    if not last_meet:
         return []
 
-    # Step 2: extract related columns for the meet
-    meet_prefix = last_valid_result_col.split("-")[0]
-    improved_col = f"{meet_prefix}-Improved"
-    date_col = f"{meet_prefix}-Date"
-    name_col = f"{meet_prefix}-Name"
+    # Determine relevant column names
+    improved_col = f"{last_meet}-Improved"
+    date_col = f"{last_meet}-Date"
+    name_col = f"{last_meet}-Name"
+    result_col = f"{last_meet}-ResultSec"
 
-    filtered = report_df[report_df[improved_col] == True].copy()
+    # Filter only rows marked as improved
+    candidates = report_df[report_df[improved_col] == True].copy()
 
-    # Step 3: find swimmers with 3+ drops
-    triple_qualifiers = filtered.groupby("LastName_FirstName").filter(lambda x: len(x) >= 3).copy()
-    final_labels = triple_qualifiers.sort_values(by=["LastName_FirstName"]).drop_duplicates(subset=["LastName_FirstName"])
+    valid_rows = []
+    for _, row in candidates.iterrows():
+        swimmer = row["LastName_FirstName"]
+        distance = row["EventDistance"]
+        stroke = row["EventStroke"]
 
-    # Step 4: build label data
+        # Get all prior meets
+        prior_meets = [m for m in meet_numbers if int(m.replace("Meet", "")) < int(last_meet.replace("Meet", ""))]
+        prior_result_cols = [f"{m}-ResultSec" for m in prior_meets]
+
+        # Get all rows with same swimmer + event
+        row_subset = report_df[
+            (report_df["LastName_FirstName"] == swimmer) &
+            (report_df["EventDistance"] == distance) &
+            (report_df["EventStroke"] == stroke)
+            ]
+
+        valid_prior = row_subset[prior_result_cols].apply(
+            lambda x: pd.to_numeric(x, errors='coerce').notna().any(), axis=1
+        ).any()
+
+        if valid_prior:
+            valid_rows.append(row)
+
+    filtered_df = pd.DataFrame(valid_rows)
+
+    # Count by swimmer
+    triple_qualifiers = filtered_df.groupby("LastName_FirstName").filter(lambda x: len(x) >= 3).copy()
+    final_labels = triple_qualifiers.sort_values(by="LastName_FirstName").drop_duplicates(subset=["LastName_FirstName"])
+
     label_data = []
     for _, row in final_labels.iterrows():
         label_data.append([
