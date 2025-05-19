@@ -26,7 +26,7 @@ def generate_fast_fishy_labels(report_csv_path):
             last_meet = meet
             break
     if not last_meet:
-        return []
+        return [], pd.DataFrame(), {}
 
     improved_col = f"{last_meet}-Improved"
     result_col = f"{last_meet}-Result"
