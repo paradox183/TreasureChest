@@ -123,7 +123,7 @@ def fast_fishy_labels():
             saved_path = os.path.join(UPLOAD_FOLDER, f"report_{timestamp}.csv")
             uploaded_file.save(saved_path)
 
-            label_data, _, rankings = generate_fast_fishy_labels(saved_path)
+            label_data, drops_df, rankings = generate_fast_fishy_labels(saved_path)
 
             if label_data:
                 label_filename = f"fast_fishy_{timestamp}.pdf"
