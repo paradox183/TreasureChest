@@ -14,7 +14,7 @@ def parse_seconds(t):
 
 def generate_fast_fishy_labels(report_csv_path):
     df = pd.read_csv(report_csv_path)
-    full_rankings = {}
+    rankings = {}
     drops_df = pd.DataFrame()
 
     meet_nums = sorted(
@@ -28,7 +28,7 @@ def generate_fast_fishy_labels(report_csv_path):
             last_meet = meet
             break
     if not last_meet:
-        return [], drops_df, full_rankings
+        return [], drops_df, rankings
 
     improved_col = f"{last_meet}-Improved"
     result_col = f"{last_meet}-Result"
@@ -77,6 +77,7 @@ def generate_fast_fishy_labels(report_csv_path):
 
     drops_df = pd.DataFrame(drops)
     labels = []
+    rankings = {}
 
     for age, group in drops_df.groupby("age"):
         group_sorted = group.groupby("swimmer").agg({
@@ -86,6 +87,13 @@ def generate_fast_fishy_labels(report_csv_path):
             "date": "first",
             "meet": "first"
         }).reset_index().sort_values("drop", ascending=False)
+
+        rankings[age] = [
+            {
+                "name": f"{row['last']}, {row['first']}",
+                "drop": f"-{row['drop']:.2f}s"
+            } for _, row in group_sorted.iterrows()
+        ]
 
         prior = prior_winners.get(age, set())
         winner = None
@@ -114,4 +122,4 @@ def generate_fast_fishy_labels(report_csv_path):
                 m["meet"]
             ])
 
-    return labels, drops_df, full_rankings
+    return labels, drops_df, rankings
