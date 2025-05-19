@@ -14,6 +14,8 @@ def parse_seconds(t):
 
 def generate_fast_fishy_labels(report_csv_path):
     df = pd.read_csv(report_csv_path)
+    full_rankings = {}
+    drops_df = pd.DataFrame()
 
     meet_nums = sorted(
         {col.split("-")[0] for col in df.columns if "ResultSec" in col},
@@ -26,7 +28,7 @@ def generate_fast_fishy_labels(report_csv_path):
             last_meet = meet
             break
     if not last_meet:
-        return [], pd.DataFrame(), {}
+        return [], drops_df, full_rankings
 
     improved_col = f"{last_meet}-Improved"
     result_col = f"{last_meet}-Result"
