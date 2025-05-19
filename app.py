@@ -113,6 +113,7 @@ def time_improvement_labels():
 @app.route("/fast-fishy-labels", methods=["GET", "POST"])
 def fast_fishy_labels():
     label_data = []
+    rankings = {}
     label_filename = ""
 
     if request.method == "POST":
@@ -122,7 +123,7 @@ def fast_fishy_labels():
             saved_path = os.path.join(UPLOAD_FOLDER, f"report_{timestamp}.csv")
             uploaded_file.save(saved_path)
 
-            label_data = generate_fast_fishy_labels(saved_path)
+            label_data, _, rankings = generate_fast_fishy_labels(saved_path)
 
             if label_data:
                 label_filename = f"fast_fishy_{timestamp}.pdf"
@@ -132,7 +133,8 @@ def fast_fishy_labels():
     return render_template(
         "fast_fishy.html",
         label_data=label_data,
-        label_filename=label_filename
+        label_filename=label_filename,
+        rankings=rankings
     )
 
 @app.route("/download/<filename>")
