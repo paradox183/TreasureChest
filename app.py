@@ -9,6 +9,7 @@ from parse_utils import (
     export_pairs_to_csv
 )
 from generate_triple_drop_labels import generate_triple_drop_labels
+from generate_time_improvement_labels import generate_time_improvement_labels
 from render_labels import render_label_pdf
 
 app = Flask(__name__)
@@ -79,6 +80,31 @@ def triple_drop_labels():
 
     return render_template(
         "triple_drop.html",
+        label_data=label_data,
+        label_filename=label_filename
+    )
+
+@app.route("/time-improvement-labels", methods=["GET", "POST"])
+def time_improvement_labels():
+    label_data = []
+    label_filename = ""
+
+    if request.method == "POST":
+        uploaded_file = request.files.get("report")
+        if uploaded_file and uploaded_file.filename.endswith(".csv"):
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            saved_path = os.path.join(UPLOAD_FOLDER, f"report_{timestamp}.csv")
+            uploaded_file.save(saved_path)
+
+            label_data = generate_time_improvement_labels(saved_path)
+
+            if label_data:
+                label_filename = f"time_improvement_{timestamp}.pdf"
+                output_path = os.path.join(UPLOAD_FOLDER, label_filename)
+                render_label_pdf(label_data, output_path)
+
+    return render_template(
+        "time_improvement.html",
         label_data=label_data,
         label_filename=label_filename
     )
