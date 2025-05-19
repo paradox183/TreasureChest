@@ -1,5 +1,16 @@
 
 import pandas as pd
+from datetime import datetime
+
+def calculate_time_drop(prev, new):
+    try:
+        fmt = "%M:%S.%f" if ":" in prev else "%S.%f"
+        t1 = datetime.strptime(prev, fmt)
+        t2 = datetime.strptime(new, fmt)
+        drop = (t1 - t2).total_seconds()
+        return f"{drop:.2f}s"
+    except:
+        return "?"
 
 def generate_time_improvement_labels(report_csv_path):
     report_df = pd.read_csv(report_csv_path)
@@ -47,7 +58,7 @@ def generate_time_improvement_labels(report_csv_path):
                 labels.append([
                     swimmer,
                     event_name,
-                    f"Previous best: {prev_time} ({new_time})",
+                    f"Previous best: {prev_time} ({calculate_time_drop(prev_time, new_time)})",
                     meet_date,
                     meet_name
                 ])
