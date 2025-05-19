@@ -4,11 +4,20 @@ from datetime import datetime
 
 def calculate_time_drop(prev, new):
     try:
-        fmt = "%M:%S.%f" if ":" in prev else "%S.%f"
-        t1 = datetime.strptime(prev, fmt)
-        t2 = datetime.strptime(new, fmt)
-        drop = (t1 - t2).total_seconds()
-        return f"{drop:.2f}s"
+        def parse_time(t):
+            t = str(t).strip().rstrip("Y").strip()
+            if ":" in t:
+                m, s = t.split(":")
+                return float(m) * 60 + float(s)
+            return float(t)
+
+        prev_sec = parse_time(prev)
+        new_sec = parse_time(new)
+        drop = prev_sec - new_sec
+
+        if drop <= 0:
+            return "0.00s"
+        return f"-{drop:.2f}"
     except:
         return "?"
 
