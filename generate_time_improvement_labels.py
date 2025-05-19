@@ -32,7 +32,10 @@ def extract_meets_with_times(report_csv_path):
     for meet in meet_numbers:
         col = f"{meet}-ResultSec"
         if col in df.columns and pd.to_numeric(df[col], errors='coerce').notna().any():
-            valid_meets.append(meet)
+            title = df[f"{meet}-Name"].dropna().values[0] if f"{meet}-Name" in df else ""
+            date = df[f"{meet}-Date"].dropna().values[0] if f"{meet}-Date" in df else ""
+            display = f"{title} — {date}" if title or date else meet
+            valid_meets.append((meet, display))
 
     return valid_meets
 
