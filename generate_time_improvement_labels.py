@@ -21,6 +21,9 @@ def calculate_time_drop(prev, new):
     except:
         return "?"
 
+def clean_time(t):
+    return str(t).strip().rstrip("Y").strip()
+
 def generate_time_improvement_labels(report_csv_path):
     report_df = pd.read_csv(report_csv_path)
 
@@ -67,7 +70,7 @@ def generate_time_improvement_labels(report_csv_path):
                 labels.append([
                     swimmer,
                     event_name,
-                    f"Previous best: {prev_time} ({calculate_time_drop(prev_time, new_time)})",
+                    f"Previous best: {clean_time(prev_time)} ({calculate_time_drop(prev_time, new_time)})",
                     meet_date,
                     meet_name
                 ])
