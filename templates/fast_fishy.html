@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fast Fishy Labels</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+        }
+        table, th, td {
+            border: 1px solid #888;
+            border-collapse: collapse;
+            padding: 4px;
+        }
+        th {
+            background: #eee;
+        }
+        .label-preview {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<h2>Fast Fishy Label Generator</h2>
+
+<form action="/fast-fishy-labels" method="post" enctype="multipart/form-data">
+    <label for="report">Upload Report CSV:</label>
+    <input type="file" name="report" accept=".csv" required>
+    <button type="submit">Generate Labels</button>
+</form>
+
+{% if label_data %}
+<h3>Generated Labels ({{ label_data|length }})</h3>
+
+<p>
+    <a href="{{ url_for('download', filename=label_filename) }}">Download PDF Labels</a>
+</p>
+
+<div class="label-preview">
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Label</th>
+            <th>Total Drop</th>
+            <th>Meet Date</th>
+            <th>Meet Title</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for label in label_data %}
+        <tr>
+            <td>{{ label[0] }}</td>
+            <td>{{ label[1] }}</td>
+            <td>{{ label[2] }}</td>
+            <td>{{ label[3] }}</td>
+            <td>{{ label[4] }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+</body>
+</html>

@@ -10,6 +10,7 @@ from parse_utils import (
 )
 from generate_triple_drop_labels import generate_triple_drop_labels
 from generate_time_improvement_labels import generate_time_improvement_labels
+from generate_fast_fishy_labels import generate_fast_fishy_labels
 from render_labels import render_label_pdf
 
 app = Flask(__name__)
@@ -105,6 +106,31 @@ def time_improvement_labels():
 
     return render_template(
         "time_improvement.html",
+        label_data=label_data,
+        label_filename=label_filename
+    )
+
+@app.route("/fast-fishy-labels", methods=["GET", "POST"])
+def fast_fishy_labels():
+    label_data = []
+    label_filename = ""
+
+    if request.method == "POST":
+        uploaded_file = request.files.get("report")
+        if uploaded_file and uploaded_file.filename.endswith(".csv"):
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            saved_path = os.path.join(UPLOAD_FOLDER, f"report_{timestamp}.csv")
+            uploaded_file.save(saved_path)
+
+            label_data = generate_fast_fishy_labels(saved_path)
+
+            if label_data:
+                label_filename = f"fast_fishy_{timestamp}.pdf"
+                output_path = os.path.join(UPLOAD_FOLDER, label_filename)
+                render_label_pdf(label_data, output_path)
+
+    return render_template(
+        "fast_fishy.html",
         label_data=label_data,
         label_filename=label_filename
     )
