@@ -41,11 +41,34 @@ def generate_triple_drop_labels(report_csv_path, target_meet, roster_csv_path=No
     # Filter for improvements
     improved_df = report_df[report_df[improved_col] == True]
 
-    # Count how many events each swimmer improved in
-    triple_swimmers = improved_df["LastName_FirstName"].value_counts()
-    triple_swimmers = triple_swimmers[triple_swimmers >= 3].index.tolist()
+    # Filter for improvements with valid prior times
+    prior_valid_rows = []
+    meet_nums = sorted(
+        {col.split("-")[0] for col in report_df.columns if "ResultSec" in col},
+        key=lambda x: int(x.replace("Meet", ""))
+    )
 
-    triple_df = improved_df[improved_df["LastName_FirstName"].isin(triple_swimmers)]
+    # Only look at meets before the target
+    prior_meets = [m for m in meet_nums if m < target_meet]
+
+    for _, row in improved_df.iterrows():
+        has_prior_time = False
+        for m in reversed(prior_meets):
+            col = f"{m}-ResultSec"
+            if col in report_df.columns:
+                val = row.get(col)
+                if pd.notna(val):
+                    has_prior_time = True
+                    break
+        if has_prior_time:
+            prior_valid_rows.append(row)
+
+    prior_df = pd.DataFrame(prior_valid_rows)
+
+    # Count valid improvements
+    triple_swimmers = prior_df["LastName_FirstName"].value_counts()
+    triple_swimmers = triple_swimmers[triple_swimmers >= 3].index.tolist()
+    triple_df = prior_df[prior_df["LastName_FirstName"].isin(triple_swimmers)]
 
     # Build label content
     labels = []
