@@ -61,7 +61,7 @@ def generate_triple_drop_labels(report_csv_path, target_meet, roster_csv_path=No
             last_first,
             age_group,
             "Triple Drop",
-            f"{row['Team']} - {date}",
+            date,
             meet_name
         ])
 
