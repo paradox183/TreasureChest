@@ -53,14 +53,13 @@ def generate_triple_drop_labels(report_csv_path, target_meet, roster_csv_path=No
     for name, group in triple_df.groupby("LastName_FirstName"):
         row = group.iloc[0]
         last_first = name
-        gender = row["Gender"]
         age_group = clean_age_group(row["AgeGroup"])
         date = row[date_col]
         meet_name = row[name_col]
 
         labels.append([
             last_first,
-            f"{gender} {age_group}",
+            age_group,
             "Triple Drop",
             f"{row['Team']} - {date}",
             meet_name
