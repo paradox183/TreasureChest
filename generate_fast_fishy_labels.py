@@ -1,6 +1,5 @@
 
 import pandas as pd
-from datetime import datetime
 
 def clean_time_string(t):
     return str(t).strip().rstrip("Y").strip()
@@ -12,32 +11,48 @@ def parse_seconds(t):
         return float(m) * 60 + float(s)
     return float(t)
 
-def generate_fast_fishy_labels(report_csv_path):
+def extract_meets_with_times(report_csv_path):
     df = pd.read_csv(report_csv_path)
-    rankings = {}
+    result_sec_cols = [col for col in df.columns if "ResultSec" in col]
+    meet_numbers = sorted(set(col.split("-")[0] for col in result_sec_cols), key=lambda x: int(x.replace("Meet", "")))
+    valid_meets = []
+
+    for meet in meet_numbers:
+        col = f"{meet}-ResultSec"
+        if col in df.columns and pd.to_numeric(df[col], errors='coerce').notna().any():
+            title = df[f"{meet}-Name"].dropna().values[0] if f"{meet}-Name" in df else ""
+            date = df[f"{meet}-Date"].dropna().values[0] if f"{meet}-Date" in df else ""
+            display = f"{title} — {date}" if title or date else meet
+            valid_meets.append((meet, display))
+
+    return valid_meets
+
+def generate_fast_fishy_labels(report_csv_path, target_meet):
+    df = pd.read_csv(report_csv_path)
     drops_df = pd.DataFrame()
+    rankings = {}
 
     meet_nums = sorted(
         {col.split("-")[0] for col in df.columns if "ResultSec" in col},
         key=lambda x: int(x.replace("Meet", ""))
     )
 
-    last_meet = None
-    for meet in reversed(meet_nums):
-        if pd.to_numeric(df.get(f"{meet}-ResultSec"), errors="coerce").notna().any():
-            last_meet = meet
-            break
-    if not last_meet:
+    prior_meets = [m for m in meet_nums if m < target_meet]
+    if not prior_meets:
         return [], drops_df, rankings
 
-    improved_col = f"{last_meet}-Improved"
-    result_col = f"{last_meet}-Result"
-    date_col = f"{last_meet}-Date"
-    name_col = f"{last_meet}-Name"
+    improved_col = f"{target_meet}-Improved"
+    result_col = f"{target_meet}-Result"
+    date_col = f"{target_meet}-Date"
+    name_col = f"{target_meet}-Name"
 
+    if not all(col in df.columns for col in [improved_col, result_col, date_col, name_col]):
+        return [], drops_df, rankings
+
+    # Track prior Fast Fishy winners
     prior_winners = {}
     for meet in meet_nums:
-        if meet == last_meet:
+        if meet == target_meet:
             continue
         label_col = f"{meet}-Label"
         if label_col in df.columns:
@@ -46,38 +61,40 @@ def generate_fast_fishy_labels(report_csv_path):
                 prior_winners.setdefault(row["AgeGroup"], set()).add(row["LastName_FirstName"])
 
     drops = []
+
     for _, row in df.iterrows():
         if not row.get(improved_col):
             continue
 
-        prev_time = None
-        for m in reversed([mn for mn in meet_nums if mn < last_meet]):
-            val = row.get(f"{m}-Result")
-            if pd.notna(val):
-                prev_time = val
+        # Must have prior time
+        has_prior = False
+        for m in reversed(prior_meets):
+            prev_col = f"{m}-Result"
+            if prev_col in df.columns and pd.notna(row.get(prev_col)):
+                has_prior = True
                 break
+        if not has_prior:
+            continue
 
-        if prev_time:
-            try:
-                prev_sec = parse_seconds(prev_time)
-                new_sec = parse_seconds(row[result_col])
-                drop = prev_sec - new_sec
-                if drop > 0:
-                    drops.append({
-                        "swimmer": row["LastName_FirstName"],
-                        "last": row["LastName"],
-                        "first": row["FirstName"],
-                        "age": row["AgeGroup"],
-                        "drop": drop,
-                        "date": row[date_col],
-                        "meet": row[name_col]
-                    })
-            except:
-                continue
+        try:
+            prev_sec = parse_seconds(row[prev_col])
+            new_sec = parse_seconds(row[result_col])
+            drop = prev_sec - new_sec
+            if drop > 0:
+                drops.append({
+                    "swimmer": row["LastName_FirstName"],
+                    "last": row["LastName"],
+                    "first": row["FirstName"],
+                    "age": row["AgeGroup"],
+                    "drop": drop,
+                    "date": row[date_col],
+                    "meet": row[name_col]
+                })
+        except:
+            continue
 
     drops_df = pd.DataFrame(drops)
     labels = []
-    rankings = {}
 
     for age, group in drops_df.groupby("age"):
         group_sorted = group.groupby("swimmer").agg({

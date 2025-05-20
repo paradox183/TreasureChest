@@ -10,7 +10,7 @@ from parse_utils import (
 )
 from generate_triple_drop_labels import generate_triple_drop_labels, extract_meets_with_times
 from generate_time_improvement_labels import generate_time_improvement_labels, extract_meets_with_times
-from generate_fast_fishy_labels import generate_fast_fishy_labels
+from generate_fast_fishy_labels import generate_fast_fishy_labels, extract_meets_with_times
 from render_labels import render_label_pdf
 
 app = Flask(__name__)
@@ -167,17 +167,38 @@ def fast_fishy_labels():
     label_data = []
     rankings = {}
     label_filename = ""
+    meet_options = []
+    selected_meet = ""
+    csv_path = ""
 
     if request.method == "POST":
-        uploaded_file = request.files.get("report")
-        if uploaded_file and uploaded_file.filename.endswith(".csv"):
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            saved_path = os.path.join(UPLOAD_FOLDER, f"report_{timestamp}.csv")
-            uploaded_file.save(saved_path)
+        if "report" in request.files:
+            uploaded_file = request.files["report"]
+            if uploaded_file and uploaded_file.filename.endswith(".csv"):
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                csv_path = os.path.join(UPLOAD_FOLDER, f"report_{timestamp}.csv")
+                uploaded_file.save(csv_path)
 
-            label_data, drops_df, rankings = generate_fast_fishy_labels(saved_path)
+                meet_options = extract_meets_with_times(csv_path)
+
+                return render_template(
+                    "fast_fishy.html",
+                    label_data=[],
+                    label_filename="",
+                    rankings={},
+                    meet_options=meet_options,
+                    selected_meet="",
+                    csv_uploaded=True,
+                    csv_path=os.path.basename(csv_path)
+                )
+
+        elif "meet" in request.form and "csv_path" in request.form:
+            selected_meet = request.form["meet"]
+            csv_path = os.path.join(UPLOAD_FOLDER, request.form["csv_path"])
+            label_data, _, rankings = generate_fast_fishy_labels(csv_path, selected_meet)
 
             if label_data:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 label_filename = f"fast_fishy_{timestamp}.pdf"
                 output_path = os.path.join(UPLOAD_FOLDER, label_filename)
                 render_label_pdf(label_data, output_path)
@@ -186,7 +207,11 @@ def fast_fishy_labels():
         "fast_fishy.html",
         label_data=label_data,
         label_filename=label_filename,
-        rankings=rankings
+        rankings=rankings,
+        meet_options=[],
+        selected_meet=selected_meet,
+        csv_uploaded=False,
+        csv_path=""
     )
 
 @app.route("/download/<filename>")
