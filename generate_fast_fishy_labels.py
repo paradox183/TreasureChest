@@ -39,7 +39,6 @@ def get_fast_fishy_winners(df, meet, prior_meets):
         if not row.get(improved_col):
             continue
 
-        # Must have prior time
         has_prior = False
         for m in reversed(prior_meets):
             prev_col = f"{m}-Result"
@@ -88,7 +87,7 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
     if not prior_meets:
         return [], drops_df, rankings
 
-    # Build prior winner map by recursively applying logic
+    # Build prior winner map
     prior_winners = {}
     for m in prior_meets:
         winners = get_fast_fishy_winners(df, m, [x for x in prior_meets if x < m])
@@ -154,41 +153,33 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
         prior = prior_winners.get(age, set())
         swimmer_count = len(group_sorted)
 
+        top_row = group_sorted.iloc[0]
+        top_name = top_row["swimmer"]
+
         if swimmer_count == 1:
-            # Only one swimmer — award regardless of past wins
-            row = group_sorted.iloc[0]
+            # Only one swimmer → always award Fast Fishy
             labels.append([
-                f"{row['last']}, {row['first']}",
+                f"{top_row['last']}, {top_row['first']}",
                 f"Fast Fishy - {age}",
-                f"Total time drop: -{row['drop']:.2f}s",
-                row["date"],
-                row["meet"]
+                f"Total time drop: -{top_row['drop']:.2f}s",
+                top_row["date"],
+                top_row["meet"]
             ])
-        else:
-            # Multiple swimmers — apply eligibility rule
-            top_row = group_sorted.iloc[0]
-            if top_row["swimmer"] in prior:
-                # Ineligible winner becomes honorable mention
-                labels.append([
-                    f"{top_row['last']}, {top_row['first']}",
-                    f"Honorable Mention - {age}",
-                    f"Total time drop: -{top_row['drop']:.2f}s",
-                    top_row["date"],
-                    top_row["meet"]
-                ])
-                # Assign Fast Fishy to next eligible
-                for _, row in group_sorted.iloc[1:].iterrows():
-                    if row["swimmer"] not in prior:
-                        labels.append([
-                            f"{row['last']}, {row['first']}",
-                            f"Fast Fishy - {age}",
-                            f"Total time drop: -{row['drop']:.2f}s",
-                            row["date"],
-                            row["meet"]
-                        ])
-                        break
+        elif top_name in prior:
+            # Top swimmer is ineligible
+            for _, row in group_sorted.iloc[1:].iterrows():
+                if row["swimmer"] not in prior:
+                    # Found next eligible winner
+                    labels.append([
+                        f"{row['last']}, {row['first']}",
+                        f"Fast Fishy - {age}",
+                        f"Total time drop: -{row['drop']:.2f}s",
+                        row["date"],
+                        row["meet"]
+                    ])
+                    break
             else:
-                # Top swimmer is eligible
+                # No one eligible → give Fast Fishy to top swimmer anyway
                 labels.append([
                     f"{top_row['last']}, {top_row['first']}",
                     f"Fast Fishy - {age}",
@@ -196,5 +187,14 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
                     top_row["date"],
                     top_row["meet"]
                 ])
+        else:
+            # Top swimmer is eligible
+            labels.append([
+                f"{top_row['last']}, {top_row['first']}",
+                f"Fast Fishy - {age}",
+                f"Total time drop: -{top_row['drop']:.2f}s",
+                top_row["date"],
+                top_row["meet"]
+            ])
 
     return labels, drops_df, rankings
