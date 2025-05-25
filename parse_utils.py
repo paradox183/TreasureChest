@@ -63,7 +63,7 @@ with pdfplumber.open(pdf_path) as pdf:
                 "Heats": heats
             })
 
-return events, meet_title
+    return events, meet_title
 
 def find_combinable_pairs(events, lanes=6):
     pairs = []
