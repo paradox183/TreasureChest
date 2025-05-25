@@ -3,3 +3,6 @@ pdfplumber
 fpdf2
 pandas
 gunicorn
+pytesseract
+pdf2image
+Pillow

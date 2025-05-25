@@ -1,72 +1,58 @@
 import re
-import pdfplumber
+import pytesseract
+from pdf2image import convert_from_path
 from datetime import datetime
 
 
-def extract_events_from_pdfplumber(pdf_path):
+def extract_events_from_microsoft_pdf(pdf_path):
     events = []
     meet_title = "Unknown Meet"
 
-    with pdfplumber.open(pdf_path) as pdf:
-        for page in pdf.pages:
-            text = page.extract_text()
-            if not text:
-                continue
-            lines = text.splitlines()
+    # Convert each page of the PDF into an image
+    try:
+        images = convert_from_path(pdf_path, dpi=300)
+    except Exception as e:
+        print(f"Error converting PDF to images: {e}")
+        return [], "Error reading PDF"
 
-            # Extract meet title
-            for line in lines:
-                if "Session Report" in line and "Page" in line:
-                    match = re.search(r"Session Report (.*?) Page", line)
-                    if match:
-                        meet_title = match.group(1).strip()
-                        meet_title = meet_title.replace("—", "-")
+    full_text = ""
+    for image in images:
+        text = pytesseract.image_to_string(image)
+        full_text += text + "\n"
 
-            for line in lines:
-                # Skip lines that don't look like events
-                if not re.match(r"^\d+\s+(Mixed|Boys|Girls|Men|Women)\s", line):
-                    continue
+    # Attempt to extract meet title
+    title_match = re.search(r"Session Report\s+(.+?)\s+Page", full_text, re.DOTALL)
+    if title_match:
+        meet_title = title_match.group(1).strip()
 
-                # Split on whitespace but preserve stroke name
-                parts = line.strip().split()
-                if len(parts) < 8:
-                    continue  # skip malformed lines
+    # Define a regex pattern to match event headers
+    event_pattern = re.compile(
+        r"Event\s+(\d+)\s+((Mixed|Girls|Boys|Women|Men)\s+(\d+[-–]\d+|\d+)\s+(.+?))\s+Heat",
+        re.IGNORECASE
+    )
 
-                # Extract fields
-                event_number = int(parts[0])
-                gender = parts[1]
-                age_group_parts = []
-                i = 2
-                # Capture age group until we find the yard/meter indicator
-                while not re.match(r"\d+(yd|m)", parts[i]):
-                    age_group_parts.append(parts[i])
-                    i += 1
-                age_group = " ".join(age_group_parts)
+    lines = full_text.splitlines()
+    seen = set()
 
-                distance = re.match(r"(\d+)(yd|m)", parts[i]).group(0)
-                i += 1
-                stroke_parts = []
-                # Capture stroke name until we reach numbers (Entries, Heats, Time)
-                while i < len(parts) and not parts[i].isdigit():
-                    stroke_parts.append(parts[i])
-                    i += 1
-                stroke = " ".join(stroke_parts)
+    for line in lines:
+        match = event_pattern.search(line)
+        if match:
+            event_number = int(match.group(1))
+            gender = match.group(3).capitalize()
+            age_group = match.group(4)
+            stroke = match.group(5).strip()
 
-                try:
-                    entries = int(parts[i])
-                    heats = int(parts[i + 1])
-                    start_time = parts[i + 2]
-                except (IndexError, ValueError):
-                    continue  # malformed row
-
+            key = (event_number, gender, age_group, stroke)
+            if key not in seen:
+                seen.add(key)
                 events.append({
                     "Event #": event_number,
                     "Gender": gender,
                     "Age Group": age_group,
-                    "Distance": distance,
+                    "Distance": None,  # Distance parsing optional
                     "Stroke": stroke,
-                    "Entries": entries,
-                    "Heats": heats,
+                    "Heats": []  # Optional: can be ignored if not extracting swimmers
                 })
 
+    print(f"📄 Parsed {len(events)} events from Microsoft PDF")
     return events, meet_title
