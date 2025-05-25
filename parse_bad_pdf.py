@@ -24,7 +24,7 @@ def extract_events_from_pdfplumber(pdf_path):
 
             for line in lines:
                 # Skip lines that don't look like events
-                if not re.match(r"^\d+\s+(Boys|Girls|Men|Women)\s", line):
+                if not re.match(r"^\d+\s+(Mixed|Boys|Girls|Men|Women)\s", line):
                     continue
 
                 # Split on whitespace but preserve stroke name
