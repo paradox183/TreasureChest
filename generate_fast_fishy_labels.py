@@ -133,6 +133,8 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
             continue
 
     drops_df = pd.DataFrame(drops)
+    if drops_df.empty or "age" not in drops_df.columns:
+        return {}
     labels = []
 
     for age, group in drops_df.groupby("age"):
