@@ -9,6 +9,7 @@ from parse_utils import (
     export_pairs_to_pdf,
     export_pairs_to_csv
 )
+from parse_bad_pdf import extract_events_from_pdfplumber
 from generate_triple_drop_labels import generate_triple_drop_labels, extract_meets_with_times
 from generate_time_improvement_labels import generate_time_improvement_labels, extract_meets_with_times
 from generate_fast_fishy_labels import generate_fast_fishy_labels, extract_meets_with_times

@@ -3,7 +3,7 @@ import pdfplumber
 from datetime import datetime
 
 
-def parse_bad_session_report(pdf_path):
+def extract_events_from_pdfplumber(pdf_path):
     events = []
     meet_title = "Unknown Meet"
 
