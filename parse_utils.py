@@ -67,6 +67,9 @@ def extract_events_from_pdf(pdf_path):
                     "Heats": heats
                 })
 
+    if not events:
+        events, meet_title = extract_events_from_bad_pdf(pdf_path)
+
     return events, meet_title
 
 def find_combinable_pairs(events, lanes=6):
@@ -292,3 +295,71 @@ def export_pairs_to_pdf(pairs, pdf_path, meet_title):
 
     pdf.output(pdf_path)
     print(f"📄 Exported {len(pairs)} combinable pairs to '{pdf_path}'")
+
+def extract_events_from_bad_pdf(pdf_path):
+    events = []
+    meet_title = "Unknown Meet"
+
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            text = page.extract_text()
+            if not text:
+                continue
+            lines = text.splitlines()
+
+            # Extract meet title
+            for line in lines:
+                if "Session Report" in line and "Page" in line:
+                    match = re.search(r"Session Report (.*?) Page", line)
+                    if match:
+                        meet_title = match.group(1).strip()
+                        meet_title = meet_title.replace("—", "-")
+
+            for line in lines:
+                # Skip lines that don't look like events
+                if not re.match(r"^\d+\s+(Mixed|Boys|Girls|Men|Women)\s", line):
+                    continue
+
+                # Split on whitespace but preserve stroke name
+                parts = line.strip().split()
+                if len(parts) < 8:
+                    continue  # skip malformed lines
+
+                # Extract fields
+                event_number = int(parts[0])
+                gender = parts[1]
+                age_group_parts = []
+                i = 2
+                # Capture age group until we find the yard/meter indicator
+                while not re.match(r"\d+(yd|m)", parts[i]):
+                    age_group_parts.append(parts[i])
+                    i += 1
+                age_group = " ".join(age_group_parts)
+
+                distance = re.match(r"(\d+)(yd|m)", parts[i]).group(0)
+                i += 1
+                stroke_parts = []
+                # Capture stroke name until we reach numbers (Entries, Heats, Time)
+                while i < len(parts) and not parts[i].isdigit():
+                    stroke_parts.append(parts[i])
+                    i += 1
+                stroke = " ".join(stroke_parts)
+
+                try:
+                    entries = int(parts[i])
+                    heats = int(parts[i + 1])
+                    start_time = parts[i + 2]
+                except (IndexError, ValueError):
+                    continue  # malformed row
+
+                events.append({
+                    "Event #": event_number,
+                    "Gender": gender,
+                    "Age Group": age_group,
+                    "Distance": distance,
+                    "Stroke": stroke,
+                    "Entries": entries,
+                    "Heats": heats,
+                })
+
+    return events, meet_title
