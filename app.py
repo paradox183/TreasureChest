@@ -240,7 +240,7 @@ def combo_generator_bad():
                 pdf_path_out = os.path.join(app.config["UPLOAD_FOLDER"], pdf_name)
 
                 export_pairs_to_csv(combinable_only, csv_path, meet_title)
-                export_pairs_to_pdf(combinable_only, pdf_path_out, meet_title)
+                # export_pairs_to_pdf(combinable_only, pdf_path_out, meet_title)
 
                 # Tag partner rows for web rendering
                 partner_ids = set(row["combine with"] for row in combinable_only)
