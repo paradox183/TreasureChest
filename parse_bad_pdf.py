@@ -6,6 +6,7 @@ from datetime import datetime
 
 
 def extract_events_from_microsoft_pdf(pdf_path):
+    print ("Running OCR parser for MS PDF")
     events = []
     meet_title = "Unknown Meet"
 
@@ -15,6 +16,21 @@ def extract_events_from_microsoft_pdf(pdf_path):
     except Exception as e:
         print(f"Error converting PDF to images: {e}")
         return [], "Error reading PDF"
+
+    output_images = []
+    output_dir = Path("static/generated")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    images = convert_from_path(pdf_path, dpi=300)
+
+    for i, image in enumerate(images):
+        image_id = uuid.uuid4().hex[:8]
+        filename = f"ocr_page_{i+1}_{image_id}.png"
+        image_path = output_dir / filename
+        image.save(image_path)
+        output_images.append(str(image_path))
+
+    return [], "Unknown Meet Title", output_images
 
     full_text = ""
     for image in images:

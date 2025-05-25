@@ -41,6 +41,15 @@
     <p><button type="submit">Generate combos</button></p>
 </form>
 
+{% if debug_images %}
+<h3>OCR Page Images</h3>
+{% for img_path in debug_images %}
+<div style="margin-bottom: 20px;">
+    <img src="{{ url_for('static', filename='generated/' + img_path.split('/')[-1]) }}" style="max-width: 100%; border: 1px solid #ccc;" />
+</div>
+{% endfor %}
+{% endif %}
+
 {% if table %}
 <hr>
 <h3>{{ meet_title }}</h3>

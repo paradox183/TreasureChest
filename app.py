@@ -229,7 +229,7 @@ def combo_generator_bad():
             uploaded_file.save(pdf_path)
 
             try:
-                events, meet_title = extract_events_from_microsoft_pdf(pdf_path)
+                events, meet_title, debug_images = extract_events_from_microsoft_pdf(pdf_path)
                 combinable_only = find_combinable_pairs(events, lanes)
 
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
