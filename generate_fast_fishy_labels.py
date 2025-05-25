@@ -152,30 +152,49 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
         ]
 
         prior = prior_winners.get(age, set())
-        winner = None
-        mentions = []
+        swimmer_count = len(group_sorted)
 
-        for _, row in group_sorted.iterrows():
-            swimmer = row["swimmer"]
-            if swimmer not in prior and winner is None:
-                winner = row
-                labels.append([
-                    f"{row['last']}, {row['first']}",
-                    f"Fast Fishy - {age}",
-                    f"Total time drop: -{row['drop']:.2f}s",
-                    row["date"],
-                    row["meet"]
-                ])
-            elif swimmer in prior:
-                mentions.append(row)
-
-        for m in mentions:
+        if swimmer_count == 1:
+            # Only one swimmer — award regardless of past wins
+            row = group_sorted.iloc[0]
             labels.append([
-                f"{m['last']}, {m['first']}",
-                f"Honorable Mention - {age}",
-                f"Total time drop: -{m['drop']:.2f}s",
-                m["date"],
-                m["meet"]
+                f"{row['last']}, {row['first']}",
+                f"Fast Fishy - {age}",
+                f"Total time drop: -{row['drop']:.2f}s",
+                row["date"],
+                row["meet"]
             ])
+        else:
+            # Multiple swimmers — apply eligibility rule
+            top_row = group_sorted.iloc[0]
+            if top_row["swimmer"] in prior:
+                # Ineligible winner becomes honorable mention
+                labels.append([
+                    f"{top_row['last']}, {top_row['first']}",
+                    f"Honorable Mention - {age}",
+                    f"Total time drop: -{top_row['drop']:.2f}s",
+                    top_row["date"],
+                    top_row["meet"]
+                ])
+                # Assign Fast Fishy to next eligible
+                for _, row in group_sorted.iloc[1:].iterrows():
+                    if row["swimmer"] not in prior:
+                        labels.append([
+                            f"{row['last']}, {row['first']}",
+                            f"Fast Fishy - {age}",
+                            f"Total time drop: -{row['drop']:.2f}s",
+                            row["date"],
+                            row["meet"]
+                        ])
+                        break
+            else:
+                # Top swimmer is eligible
+                labels.append([
+                    f"{top_row['last']}, {top_row['first']}",
+                    f"Fast Fishy - {age}",
+                    f"Total time drop: -{top_row['drop']:.2f}s",
+                    top_row["date"],
+                    top_row["meet"]
+                ])
 
     return labels, drops_df, rankings
