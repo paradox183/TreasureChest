@@ -41,6 +41,18 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
     if not prior_meets:
         return [], drops_df, rankings
 
+    # Find prior Fast Fishy winners
+    prior_winners = {}
+    for m in prior_meets:
+        label_col = f"{m}-Label"
+        if label_col in df.columns:
+            for _, row in df.iterrows():
+                if row.get(label_col) == "Fast Fishy":
+                    age = row.get("AgeGroup", "").strip()
+                    name = row.get("LastName_FirstName", "").strip()
+                    if age and name:
+                        prior_winners.setdefault(age, set()).add(name)
+
     improved_col = f"{target_meet}-Improved"
     result_col = f"{target_meet}-Result"
     date_col = f"{target_meet}-Date"
@@ -48,17 +60,6 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
 
     if not all(col in df.columns for col in [improved_col, result_col, date_col, name_col]):
         return [], drops_df, rankings
-
-    # Track prior Fast Fishy winners
-    prior_winners = {}
-    for meet in meet_nums:
-        if meet == target_meet:
-            continue
-        label_col = f"{meet}-Label"
-        if label_col in df.columns:
-            winners = df[df[label_col] == "Fast Fishy"]
-            for _, row in winners.iterrows():
-                prior_winners.setdefault(row["AgeGroup"], set()).add(row["LastName_FirstName"])
 
     drops = []
 
