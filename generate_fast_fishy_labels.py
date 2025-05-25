@@ -72,7 +72,7 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
                         "swimmer": row["LastName_FirstName"],
                         "last": row["LastName"],
                         "first": row["FirstName"],
-                        "age": row["AgeGroup"].strip(),
+                        "age": row.get("AgeGroup", "").strip(),
                         "drop": drop,
                         "date": row[date_col],
                         "meet": row[name_col]
