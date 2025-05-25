@@ -1,5 +1,20 @@
 
 import pandas as pd
+def extract_meets_with_times(report_csv_path):
+    df = pd.read_csv(report_csv_path)
+    result_sec_cols = [col for col in df.columns if "ResultSec" in col]
+    meet_numbers = sorted(set(col.split("-")[0] for col in result_sec_cols), key=lambda x: int(x.replace("Meet", "")))
+    valid_meets = []
+
+    for meet in meet_numbers:
+        col = f"{meet}-ResultSec"
+        if col in df.columns and pd.to_numeric(df[col], errors='coerce').notna().any():
+            title = df[f"{meet}-Name"].dropna().values[0] if f"{meet}-Name" in df else ""
+            date = df[f"{meet}-Date"].dropna().values[0] if f"{meet}-Date" in df else ""
+            display = f"{title} — {date}" if title or date else meet
+            valid_meets.append((meet, display))
+
+    return valid_meets
 
 def clean_time_string(t):
     return str(t).strip().rstrip("Y").strip()
