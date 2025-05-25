@@ -61,12 +61,11 @@ def extract_events_from_pdfplumber(pdf_path):
                 events.append({
                     "Event #": event_number,
                     "Gender": gender,
-                    "Age": age_group,
+                    "Age Group": age_group,
                     "Distance": distance,
                     "Stroke": stroke,
                     "Entries": entries,
                     "Heats": heats,
-                    "Start": start_time,
                 })
 
     return events, meet_title
