@@ -67,7 +67,7 @@ def get_fast_fishy_winners(df, meet, prior_meets):
 
     winners = {}
     for age, group in drops_df.groupby("age"):
-        group_sorted = group.groupby("swimmer").agg({"swimmer": "count"}).reset_index()
+        group_sorted = group.groupby("swimmer").size().reset_index(name="event_count")
         if not group_sorted.empty:
             top_swimmer = group_sorted.iloc[0]["swimmer"]
             winners.setdefault(age, set()).add(top_swimmer)
