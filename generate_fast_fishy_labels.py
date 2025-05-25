@@ -56,7 +56,7 @@ def get_fast_fishy_winners(df, meet, prior_meets):
             if drop > 0:
                 drops.append({
                     "swimmer": row["LastName_FirstName"],
-                    "age": row["AgeGroup"]
+                    "age": row["AgeGroup"].strip()
                 })
         except:
             continue
@@ -124,7 +124,7 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
                     "swimmer": row["LastName_FirstName"],
                     "last": row["LastName"],
                     "first": row["FirstName"],
-                    "age": row["AgeGroup"],
+                    "age": row["AgeGroup"].strip(),
                     "drop": drop,
                     "date": row[date_col],
                     "meet": row[name_col]
