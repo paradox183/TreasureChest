@@ -20,6 +20,7 @@ def extract_events_from_pdfplumber(pdf_path):
                     match = re.search(r"Session Report (.*?) Page", line)
                     if match:
                         meet_title = match.group(1).strip()
+                        meet_title = meet_title.replace("—", "-")
 
             for line in lines:
                 # Skip lines that don't look like events
