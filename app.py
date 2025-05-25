@@ -17,6 +17,7 @@ from render_labels import render_label_pdf
 app = Flask(__name__)
 UPLOAD_FOLDER = "static/generated"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 @app.route("/")
 def home():
