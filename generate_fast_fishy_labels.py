@@ -62,6 +62,8 @@ def get_fast_fishy_winners(df, meet, prior_meets):
             continue
 
     drops_df = pd.DataFrame(drops)
+    if drops_df.empty or "age" not in drops_df.columns:
+        return {}
 
     winners = {}
     for age, group in drops_df.groupby("age"):
@@ -86,14 +88,13 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
     if not prior_meets:
         return [], drops_df, rankings
 
-    # Step 1: Build prior winner map by recursively applying logic
+    # Build prior winner map by recursively applying logic
     prior_winners = {}
     for m in prior_meets:
         winners = get_fast_fishy_winners(df, m, [x for x in prior_meets if x < m])
         for age, names in winners.items():
             prior_winners.setdefault(age, set()).update(names)
 
-    # Step 2: Now calculate drops for current meet
     improved_col = f"{target_meet}-Improved"
     result_col = f"{target_meet}-Result"
     date_col = f"{target_meet}-Date"
@@ -105,7 +106,6 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
         if not row.get(improved_col):
             continue
 
-        # Must have prior time
         has_prior = False
         for m in reversed(prior_meets):
             prev_col = f"{m}-Result"
@@ -133,8 +133,6 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
             continue
 
     drops_df = pd.DataFrame(drops)
-    if drops_df.empty or "age" not in drops_df.columns:
-        return {}
     labels = []
 
     for age, group in drops_df.groupby("age"):
