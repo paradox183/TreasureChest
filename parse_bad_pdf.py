@@ -1,6 +1,7 @@
 import re
 import pytesseract
 from pdf2image import convert_from_path
+import unicodedata
 from datetime import datetime
 
 
@@ -56,3 +57,21 @@ def extract_events_from_microsoft_pdf(pdf_path):
 
     print(f"📄 Parsed {len(events)} events from Microsoft PDF")
     return events, meet_title
+
+def sanitize_for_pdf(text: str) -> str:
+    # Replace known problematic characters
+    replacements = {
+        "—": "-",       # em-dash to hyphen
+        "–": "-",       # en-dash to hyphen
+        "™": "",        # remove trademark symbol
+        "“": '"',       # curly quotes to straight
+        "”": '"',
+        "‘": "'",
+        "’": "'",
+        "…": "...",     # ellipsis
+    }
+    for bad, good in replacements.items():
+        text = text.replace(bad, good)
+
+    # Normalize and remove any remaining non-Latin-1 characters
+    return unicodedata.normalize("NFKD", text).encode("latin-1", "ignore").decode("latin-1")

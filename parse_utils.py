@@ -1,11 +1,15 @@
 
 import pdfplumber
+import unicodedata
 import pandas as pd
 import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from fpdf import FPDF
 from fpdf.enums import XPos, YPos
+
+from parse_bad_pdf import sanitize_for_pdf
+
 
 def extract_events_from_pdf(pdf_path):
     events = []
@@ -283,7 +287,7 @@ def export_pairs_to_pdf(pairs, pdf_path, meet_title):
             else:
                 fill = False
 
-            pdf.cell(col_widths[i], 8, text, border=1, fill=fill)
+            pdf.cell(col_widths[i], 8, sanitize_for_pdf(text), border=1, fill=fill)
         pdf.ln()
 
     # Add timestamp centered below the table, in CDT
@@ -363,3 +367,21 @@ def extract_events_from_bad_pdf(pdf_path):
                 })
 
     return events, meet_title
+
+def sanitize_for_pdf(text: str) -> str:
+    # Replace known problematic characters
+    replacements = {
+        "—": "-",       # em-dash to hyphen
+        "–": "-",       # en-dash to hyphen
+        "™": "",        # remove trademark symbol
+        "“": '"',       # curly quotes to straight
+        "”": '"',
+        "‘": "'",
+        "’": "'",
+        "…": "...",     # ellipsis
+    }
+    for bad, good in replacements.items():
+        text = text.replace(bad, good)
+
+    # Normalize and remove any remaining non-Latin-1 characters
+    return unicodedata.normalize("NFKD", text).encode("latin-1", "ignore").decode("latin-1")

@@ -7,7 +7,8 @@ from parse_utils import (
     evaluate_all_events,
     find_combinable_pairs,
     export_pairs_to_pdf,
-    export_pairs_to_csv
+    export_pairs_to_csv,
+    sanitize_for_pdf
 )
 from parse_bad_pdf import extract_events_from_microsoft_pdf
 from generate_triple_drop_labels import generate_triple_drop_labels, extract_meets_with_times
