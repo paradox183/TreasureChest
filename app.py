@@ -214,6 +214,53 @@ def fast_fishy_labels():
         csv_path=""
     )
 
+@app.route("/combo-generator-bad", methods=["GET", "POST"])
+def combo_generator_bad():
+    if request.method == "POST":
+        uploaded_file = request.files["pdf"]
+        lanes = int(request.form.get("lanes", 6))
+        if uploaded_file and uploaded_file.filename.endswith(".pdf"):
+            filename = secure_filename(uploaded_file.filename)
+            pdf_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            uploaded_file.save(pdf_path)
+
+            try:
+                events, meet_title = extract_events_from_pdfplumber(pdf_path)
+                combinable_only = find_combinable_pairs(events, lanes)
+
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                base = os.path.splitext(filename)[0]
+                csv_name = f"{base}_combos_bad_{timestamp}.csv"
+                pdf_name = f"{base}_combos_bad_{timestamp}.pdf"
+                csv_path = os.path.join(app.config["UPLOAD_FOLDER"], csv_name)
+                pdf_path_out = os.path.join(app.config["UPLOAD_FOLDER"], pdf_name)
+
+                export_pairs_to_csv(combinable_only, csv_path, meet_title)
+                export_pairs_to_pdf(combinable_only, pdf_path_out, meet_title)
+
+                # Tag partner rows for web rendering
+                partner_ids = set(row["combine with"] for row in combinable_only)
+                full_table = []
+                for row in events:
+                    d = dict(row)
+                    d["_highlight_partner"] = str(row["Event ID"]) in partner_ids
+                    full_table.append(d)
+
+                return render_template(
+                    "combo_bad.html",
+                    table=full_table,
+                    lanes=lanes,
+                    combo_count=len(combinable_only),
+                    meet_title=meet_title,
+                    csv_filename=csv_name,
+                    pdf_filename=pdf_name,
+                )
+
+            except Exception as e:
+                return f"<h3>Error: {str(e)}</h3>", 500
+
+    return render_template("combo_bad.html")
+
 @app.route("/download/<filename>")
 def download(filename):
     return send_file(os.path.join(UPLOAD_FOLDER, filename), as_attachment=True)

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Combo Generator (Bad PDF)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystem, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+        }
+        table, th, td {
+            border: 1px solid #888;
+            border-collapse: collapse;
+            padding: 4px;
+        }
+        th {
+            background: #eee;
+        }
+        .highlight {
+            background-color: rgb(197, 227, 188);
+        }
+        .partner {
+            background-color: rgb(222, 247, 222);
+        }
+    </style>
+</head>
+<body>
+<h2>Event Combo Generator (Bad PDF)</h2>
+<p>
+    Use this form to test PDF parsing for session reports with formatting issues.<br>
+    Use Chrome or Firefox to export a session report from Meet Maestro.<br>
+    <u>Do not</u> use Edge, Safari, or the "Microsoft Print to PDF" printer.
+</p>
+<form action="/combo-generator-bad" method="post" enctype="multipart/form-data">
+    <p><label for="pdf">PDF File:</label>
+        <input type="file" name="pdf" accept=".pdf" required></p>
+    <p><label for="lanes">Lanes:</label>
+        <select name="lanes" required>
+            {% for l in range(4, 9) %}
+            <option value="{{ l }}" {% if lanes == l %}selected{% endif %}>{{ l }}</option>
+            {% endfor %}
+        </select></p>
+    <p><button type="submit">Generate combos</button></p>
+</form>
+
+{% if table %}
+<hr>
+<h3>{{ meet_title }}</h3>
+<p><strong>Total combo event pairs: {{ combo_count }}</strong></p>
+<p>
+    Combos only: <a href="{{ url_for('download', filename=csv_filename) }}">Download CSV</a> |
+    <a href="{{ url_for('download', filename=pdf_filename) }}">Download PDF</a>
+</p>
+
+<table>
+    <thead>
+    <tr>
+        {% for key in table[0].keys() %}
+        <th>{{ key }}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in table %}
+    <tr class="
+        {% if row['Can Combine?'] == 'Yes' %}highlight
+        {% elif row['_highlight_partner'] %}partner
+        {% endif %}
+    ">
+        {% for key, val in row.items() %}
+        {% if not key.startswith('_') %}
+        <td>{{ val }}</td>
+        {% endif %}
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+</body>
+</html>
