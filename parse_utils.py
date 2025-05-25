@@ -7,67 +7,63 @@ from zoneinfo import ZoneInfo
 from fpdf import FPDF
 from fpdf.enums import XPos, YPos
 
-def extract_events_from_pdf(pdf_path):
-    events = []
-    meet_title = "Meet Title"
+with pdfplumber.open(pdf_path) as pdf:
+    for page_num, page in enumerate(pdf.pages):
+        lines = page.extract_text().split('\n')
 
-    with pdfplumber.open(pdf_path) as pdf:
-        for page_num, page in enumerate(pdf.pages):
-            lines = page.extract_text().split('\n')
+        for line_num, line in enumerate(lines):
+            if "Session Report" in line and "Page" in line:
+                try:
+                    start = line.index("Session Report") + len("Session Report")
+                    end = line.index("Page")
+                    meet_title = line[start:end].strip(" —-")
+                    meet_title = meet_title.replace("—", "-")
+                except:
+                    pass
 
-            for line_num, line in enumerate(lines):
-                if "Session Report" in line and "Page" in line:
-                    try:
-                        start = line.index("Session Report") + len("Session Report")
-                        end = line.index("Page")
-                        meet_title = line[start:end].strip(" —-")
-                        meet_title = meet_title.replace("—", "-")
-                    except:
-                        pass
+            match = re.match(r'^(\d+)\s+(Mixed|Girls|Boys|Women|Men)\s+(.+?)\s+(\d+)\s+(\d+)\s+(\d{1,2}:\d{2}\s*[AP]M)$', line.strip())
+            if not match:
+                continue
 
-                match = re.match(r'^(\d+)\s+(Mixed|Girls|Boys|Women|Men)\s+(.+?)\s+(\d+)\s+(\d+)\s+(\d{1,2}:\d{2}\s*[AP]M)$', line.strip())
-                if not match:
-                    continue
+            number = int(match.group(1))
+            gender = match.group(2)
+            rest = match.group(3).strip()
+            entries = int(match.group(4))
+            heats = int(match.group(5))
 
-                number = int(match.group(1))
-                gender = match.group(2)
-                rest = match.group(3).strip()
-                entries = int(match.group(4))
-                heats = int(match.group(5))
+            if rest.startswith("6"):
+                age_group = rest[:9]
+                remainder = rest[9:]
+            elif rest.startswith("7"):
+                age_group = rest[:3]
+                remainder = rest[3:]
+            elif rest.startswith("9"):
+                age_group = rest[:4]
+                remainder = rest[4:]
+            elif rest.startswith("1"):
+                age_group = rest[:5]
+                remainder = rest[5:]
+            else:
+                continue
 
-                if rest.startswith("6"):
-                    age_group = rest[:9]
-                    remainder = rest[9:]
-                elif rest.startswith("7"):
-                    age_group = rest[:3]
-                    remainder = rest[3:]
-                elif rest.startswith("9"):
-                    age_group = rest[:4]
-                    remainder = rest[4:]
-                elif rest.startswith("1"):
-                    age_group = rest[:5]
-                    remainder = rest[5:]
-                else:
-                    continue
+            distance_match = re.match(r'^(\d{2,3}yd)(.+)$', remainder)
+            if not distance_match:
+                continue
 
-                distance_match = re.match(r'^(\d{2,3}yd)(.+)$', remainder)
-                if not distance_match:
-                    continue
+            distance = distance_match.group(1)
+            stroke = distance_match.group(2).strip()
 
-                distance = distance_match.group(1)
-                stroke = distance_match.group(2).strip()
+            events.append({
+                "Event #": number,
+                "Gender": gender,
+                "Age Group": age_group,
+                "Distance": distance,
+                "Stroke": stroke,
+                "Entries": entries,
+                "Heats": heats
+            })
 
-                events.append({
-                    "Event #": number,
-                    "Gender": gender,
-                    "Age Group": age_group,
-                    "Distance": distance,
-                    "Stroke": stroke,
-                    "Entries": entries,
-                    "Heats": heats
-                })
-
-    return events, meet_title
+return events, meet_title
 
 def find_combinable_pairs(events, lanes=6):
     pairs = []
@@ -80,9 +76,9 @@ def find_combinable_pairs(events, lanes=6):
                 continue
 
             if (
-                e1["Age Group"] == e2["Age Group"]
-                and e1["Distance"] == e2["Distance"]
-                and e1["Stroke"] == e2["Stroke"]
+                    e1["Age Group"] == e2["Age Group"]
+                    and e1["Distance"] == e2["Distance"]
+                    and e1["Stroke"] == e2["Stroke"]
             ):
                 r1 = e1["Entries"] % lanes
                 r2 = e2["Entries"] % lanes
@@ -292,3 +288,106 @@ def export_pairs_to_pdf(pairs, pdf_path, meet_title):
 
     pdf.output(pdf_path)
     print(f"📄 Exported {len(pairs)} combinable pairs to '{pdf_path}'")
+
+
+import pdfplumber
+import pandas as pd
+import re
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from fpdf import FPDF
+from fpdf.enums import XPos, YPos
+
+def extract_events_from_pdf(pdf_path):
+    # Try standard extraction first
+    try:
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                lines = page.extract_text().split('\n')
+                for line in lines[:10]:  # Check first 10 lines for event match
+                    if re.match(r'^(\d+)\s+(Mixed|Girls|Boys|Women|Men)\s+(.+?)\s+(\d+)\s+(\d+)\s+(\d{1,2}:\d{2}\s*[AP]M)$', line.strip()):
+                        return extract_events_from_good_pdf(pdf_path)
+    except:
+        pass
+    return extract_events_from_bad_pdf(pdf_path)
+
+def extract_events_from_good_pdf(pdf_path):
+    events = []
+    meet_title = "Meet Title"
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            lines = page.extract_text().split('\n')
+            for line in lines:
+                if "Session Report" in line and "Page" in line:
+                    try:
+                        start = line.index("Session Report") + len("Session Report")
+                        end = line.index("Page")
+                        meet_title = line[start:end].strip(" —-")
+                        meet_title = meet_title.replace("—", "-")
+                    except:
+                        pass
+                match = re.match(r'^(\d+)\s+(Mixed|Girls|Boys|Women|Men)\s+(.+?)\s+(\d+)\s+(\d+)\s+(\d{1,2}:\d{2}\s*[AP]M)$', line.strip())
+                if match:
+                    events.append({
+                        "Event #": int(match.group(1)),
+                        "Gender": match.group(2),
+                        "Age Group": extract_age_group(match.group(3)),
+                        "Distance": extract_distance(match.group(3)),
+                        "Stroke": extract_stroke(match.group(3)),
+                        "Entries": int(match.group(4)),
+                        "Heats": int(match.group(5))
+                    })
+    return events, meet_title
+
+def extract_events_from_bad_pdf(pdf_path):
+    events = []
+    meet_title = "Meet Title"
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            table = page.extract_table()
+            if not table:
+                continue
+            for row in table:
+                if not row or len(row) < 6:
+                    continue
+                try:
+                    event_num = int(row[0].strip())
+                    gender_age = row[1].strip().split()
+                    gender = gender_age[0]
+                    age_group = " ".join(gender_age[1:])
+                    distance_stroke = row[2].strip()
+                    entries = int(row[3])
+                    heats = int(row[4])
+                    distance = extract_distance(distance_stroke)
+                    stroke = extract_stroke(distance_stroke)
+                    events.append({
+                        "Event #": event_num,
+                        "Gender": gender,
+                        "Age Group": age_group,
+                        "Distance": distance,
+                        "Stroke": stroke,
+                        "Entries": entries,
+                        "Heats": heats
+                    })
+                except:
+                    continue
+    return events, meet_title
+
+def extract_age_group(text):
+    if text.startswith("6"):
+        return text[:9]
+    elif text.startswith("7"):
+        return text[:3]
+    elif text.startswith("9"):
+        return text[:4]
+    elif text.startswith("1"):
+        return text[:5]
+    return text
+
+def extract_distance(text):
+    match = re.search(r'(\d{2,3})yd', text)
+    return match.group(0) if match else ""
+
+def extract_stroke(text):
+    match = re.search(r'yd\s+(.+)', text)
+    return match.group(1).strip() if match else ""
