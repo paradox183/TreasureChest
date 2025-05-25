@@ -3,6 +3,7 @@ import pytesseract
 from pdf2image import convert_from_path
 from pathlib import Path
 import unicodedata
+import uuid
 from datetime import datetime
 
 
