@@ -1,6 +1,7 @@
 import re
 import pytesseract
 from pdf2image import convert_from_path
+from pathlib import Path
 import unicodedata
 from datetime import datetime
 
