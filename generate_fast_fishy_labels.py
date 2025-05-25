@@ -80,7 +80,10 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
             except:
                 continue
 
-        return pd.DataFrame(drops)
+        df_drops = pd.DataFrame(drops)
+        if "age" not in df_drops.columns:
+            df_drops["age"] = ""
+        return df_drops
 
     # Step 1: Loop through all earlier meets to accumulate winners
     for m in prior_meets:
