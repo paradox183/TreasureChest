@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, send_file, redirect, url_for
 import os
 from datetime import datetime
+from werkzeug.utils import secure_filename
 from parse_utils import (
     extract_events_from_pdf,
     evaluate_all_events,
