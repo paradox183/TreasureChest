@@ -135,7 +135,7 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
                 # Honorable Mention
                 labels.append([
                     f"{top_row['last']}, {top_row['first']}",
-                    f"Honorable Mention - {age}",
+                    f"Repeat Fast Fishy - {age}",
                     f"Total time drop: -{top_row['drop']:.2f}s",
                     top_row["date"],
                     top_row["meet"]
