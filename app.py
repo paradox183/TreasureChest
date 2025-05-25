@@ -246,7 +246,7 @@ def combo_generator_bad():
                 full_table = []
                 for row in events:
                     d = dict(row)
-                    d["_highlight_partner"] = str(row["Event ID"]) in partner_ids
+                    d["_highlight_partner"] = str(row["Event #"]) in partner_ids
                     full_table.append(d)
 
                 return render_template(
