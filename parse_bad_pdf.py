@@ -34,10 +34,13 @@ def extract_events_from_microsoft_pdf(pdf_path):
                 if match:
                     meet_title = match.group(1).strip()
 
+            # Match valid event rows (skip breaks and malformed lines)
+            event_pattern = re.compile(r"^(\d+)\s+(.+?)\s+(\d+)\s+(\d+)\s+\d{1,2}:\d{2}\s+[AP]M", re.IGNORECASE)
+
             # Look for event blocks
             current_event = None
-            for line in text.split("\n"):
-                line = line.strip()
+            for line in text.splitlines():
+                event_match = event_pattern.match(line.strip())
 
                 if not line:
                     continue
@@ -45,16 +48,25 @@ def extract_events_from_microsoft_pdf(pdf_path):
                 # Sanitize to remove unsupported characters
                 line = sanitize_for_pdf(line)
 
-                event_match = re.match(r"^Event\s+(\d+)\s+(Girls|Boys|Mixed)\s+(\d+)-?(\d+)?\s+(.+)$", line)
                 if event_match:
-                    current_event = {
-                        "Event ID": int(event_match.group(1)),
-                        "Gender": event_match.group(2),
-                        "Age Group": event_match.group(3) + ("-" + event_match.group(4) if event_match.group(4) else ""),
-                        "Distance": "",
-                        "Stroke": event_match.group(5).strip(),
-                        "Heats": []
-                    }
+                    event_id = int(match.group(1))
+                    title = match.group(2).strip()
+                    entries = int(match.group(3))
+                    heats = int(match.group(4))
+
+                    parsed = parse_event_title(title)
+                    if parsed:
+                        gender, age_group, distance, stroke = parsed
+                        events.append({
+                            "Event #": event_id,
+                            "Gender": gender,
+                            "Age Group": age_group,
+                            "Distance": distance,
+                            "Stroke": stroke,
+                            "Entries": entries,
+                            "Heats": heats,
+                        })
+
                     events.append(current_event)
 
                 elif current_event:
@@ -67,3 +79,27 @@ def extract_events_from_microsoft_pdf(pdf_path):
 
 def sanitize_for_pdf(text):
     return text.replace("—", "-").replace("™", "")
+
+def parse_event_title(title):
+    title = title.lower()
+    title = title.replace("&", "and")
+
+    gender_match = re.match(r"(mixed|girls|boys|women|men)\s+", title)
+    if not gender_match:
+        return None
+    gender = gender_match.group(1).capitalize()
+    remainder = title[gender_match.end():]
+
+    age_match = re.match(r"(\d+\s*and\s*under|\d+\s*-\s*\d+|\d+)", remainder)
+    if not age_match:
+        return None
+    age_group = age_match.group(1).replace(" ", "")
+    remainder = remainder[age_match.end():].strip()
+
+    distance_match = re.match(r"(\d+)(yd|meter|m)\s+", remainder)
+    if not distance_match:
+        return None
+    distance = f"{distance_match.group(1)}yd"
+    stroke = remainder[distance_match.end():].strip().capitalize()
+
+    return gender, age_group, distance, stroke
