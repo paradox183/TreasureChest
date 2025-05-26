@@ -45,6 +45,9 @@ def extract_events_from_microsoft_pdf(pdf_path):
                 if not line:
                     continue
 
+                if not re.match(r"^\d+\s+(Mixed|Boys|Girls|Men|Women)\s", line):
+                    continue
+
                 # Sanitize to remove unsupported characters
                 line = sanitize_for_pdf(line)
 
