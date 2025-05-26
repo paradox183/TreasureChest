@@ -3,6 +3,7 @@ import os
 import pytesseract
 from pdf2image import convert_from_path
 from tempfile import TemporaryDirectory
+from PIL import ImageOps
 from pathlib import Path
 
 
@@ -21,8 +22,9 @@ def extract_events_from_microsoft_pdf(pdf_path):
             image_paths.append(image_filename)
 
             # Convert image to grayscale for better OCR results
-            open_cv_image = cv2.cvtColor(cv2.imread(image_filename), cv2.COLOR_BGR2GRAY)
-            text = pytesseract.image_to_string(open_cv_image)
+            image_pil = Image.open(image_filename)
+            gray = ImageOps.grayscale(image_pil)
+            text = pytesseract.image_to_string(gray)
 
             # Extract meet title if found
             if "Session Report" in text:
