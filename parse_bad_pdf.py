@@ -32,7 +32,7 @@ def extract_events_from_microsoft_pdf(pdf_path):
             if "Session Report" in text:
                 match = re.search(r"Session Report\s+(.*?)\s+Page", text, re.DOTALL)
                 if match:
-                    meet_title = match.group(1).strip()
+                    meet_title = sanitize_for_pdf(match.group(1).strip())
 
             # Match valid event rows (skip breaks and malformed lines)
             event_pattern = re.compile(r"^(\d+)\s+(.+?)\s+(\d+)\s+(\d+)\s+\d{1,2}:\d{2}\s+[AP]M", re.IGNORECASE)
@@ -48,7 +48,7 @@ def extract_events_from_microsoft_pdf(pdf_path):
                 # Sanitize to remove unsupported characters
                 line = sanitize_for_pdf(line)
 
-                if event_match:
+                if event_match and meet_title != "Unknown Meet":
                     event_id = int(match.group(1))
                     title = match.group(2).strip()
                     entries = int(match.group(3))
