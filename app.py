@@ -220,8 +220,8 @@ def fast_fishy_labels():
 
 @app.route("/combo-generator-bad", methods=["GET", "POST"])
 def combo_generator_bad():
-    output_images = []
-
+    # output_images = []
+    '''
     for i, image in enumerate(images):
         image_id = uuid.uuid4().hex[:8]
         filename = f"ocr_page_{i+1}_{image_id}.png"
@@ -229,6 +229,7 @@ def combo_generator_bad():
         image.save(image_path)
         output_images.append(str(image_path))
         print("Saved image:", image_path)
+    '''
 
     if request.method == "POST":
         uploaded_file = request.files["pdf"]
