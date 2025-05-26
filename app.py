@@ -220,7 +220,7 @@ def fast_fishy_labels():
 
 @app.route("/combo-generator-bad", methods=["GET", "POST"])
 def combo_generator_bad():
-    debug_images = [os.path.basename(p) for p in image_paths]
+    debug_images = []
     '''
     for i, image in enumerate(images):
         image_id = uuid.uuid4().hex[:8]
@@ -240,7 +240,8 @@ def combo_generator_bad():
             uploaded_file.save(pdf_path)
 
             try:
-                events, meet_title, debug_images = extract_events_from_microsoft_pdf(pdf_path)
+                events, meet_title, image_paths = extract_events_from_microsoft_pdf(pdf_path)
+                debug_images = [os.path.basename(p) for p in image_paths]
                 combinable_only = find_combinable_pairs(events, lanes)
 
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -269,6 +270,7 @@ def combo_generator_bad():
                     meet_title=meet_title,
                     csv_filename=csv_name,
                     pdf_filename=pdf_name,
+                    debug_images=debug_images
                 )
 
             except Exception as e:

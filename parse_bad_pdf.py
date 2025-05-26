@@ -1,96 +1,66 @@
 import re
+import os
+import cv2
 import pytesseract
 from pdf2image import convert_from_path
+from tempfile import TemporaryDirectory
 from pathlib import Path
-import unicodedata
-import uuid
-from datetime import datetime
 
 
 def extract_events_from_microsoft_pdf(pdf_path):
-    print ("Running OCR parser for MS PDF")
     events = []
     meet_title = "Unknown Meet"
+    image_paths = []
 
-    # Convert each page of the PDF into an image
-    try:
-        images = convert_from_path(pdf_path, dpi=300)
-    except Exception as e:
-        print(f"Error converting PDF to images: {e}")
-        return [], "Error reading PDF"
+    # Use pdf2image to convert PDF pages to images
+    with TemporaryDirectory() as temp_dir:
+        images = convert_from_path(pdf_path, dpi=300, output_folder=temp_dir, fmt="png")
 
-    output_images = []
-    output_dir = Path("static/generated")
-    output_dir.mkdir(parents=True, exist_ok=True)
+        for i, image in enumerate(images):
+            image_filename = os.path.join("static/generated", f"debug_page_{i+1}.png")
+            image.save(image_filename, "PNG")
+            image_paths.append(image_filename)
 
-    images = convert_from_path(pdf_path, dpi=300)
+            # Convert image to grayscale for better OCR results
+            open_cv_image = cv2.cvtColor(cv2.imread(image_filename), cv2.COLOR_BGR2GRAY)
+            text = pytesseract.image_to_string(open_cv_image)
 
-    for i, image in enumerate(images):
-        image_id = uuid.uuid4().hex[:8]
-        filename = f"ocr_page_{i+1}_{image_id}.png"
-        image_path = output_dir / filename
-        image.save(image_path)
-        output_images.append(str(image_path))
-        print("Saved image:", image_path)
+            # Extract meet title if found
+            if "Session Report" in text:
+                match = re.search(r"Session Report\s+(.*?)\s+Page", text, re.DOTALL)
+                if match:
+                    meet_title = match.group(1).strip()
 
-    return [], "Unknown Meet Title", output_images
+            # Look for event blocks
+            current_event = None
+            for line in text.split("\n"):
+                line = line.strip()
 
-    full_text = ""
-    for image in images:
-        text = pytesseract.image_to_string(image)
-        full_text += text + "\n"
+                if not line:
+                    continue
 
-    # Attempt to extract meet title
-    title_match = re.search(r"Session Report\s+(.+?)\s+Page", full_text, re.DOTALL)
-    if title_match:
-        meet_title = title_match.group(1).strip()
+                # Sanitize to remove unsupported characters
+                line = sanitize_for_pdf(line)
 
-    # Define a regex pattern to match event headers
-    event_pattern = re.compile(
-        r"Event\s+(\d+)\s+((Mixed|Girls|Boys|Women|Men)\s+(\d+[-–]\d+|\d+)\s+(.+?))\s+Heat",
-        re.IGNORECASE
-    )
+                event_match = re.match(r"^Event\s+(\d+)\s+(Girls|Boys|Mixed)\s+(\d+)-?(\d+)?\s+(.+)$", line)
+                if event_match:
+                    current_event = {
+                        "Event ID": int(event_match.group(1)),
+                        "Gender": event_match.group(2),
+                        "Age Group": event_match.group(3) + ("-" + event_match.group(4) if event_match.group(4) else ""),
+                        "Distance": "",
+                        "Stroke": event_match.group(5).strip(),
+                        "Heats": []
+                    }
+                    events.append(current_event)
 
-    lines = full_text.splitlines()
-    seen = set()
+                elif current_event:
+                    heat_match = re.search(r"Heat\s+(\d+)", line)
+                    if heat_match:
+                        current_event["Heats"].append(int(heat_match.group(1)))
 
-    for line in lines:
-        match = event_pattern.search(line)
-        if match:
-            event_number = int(match.group(1))
-            gender = match.group(3).capitalize()
-            age_group = match.group(4)
-            stroke = match.group(5).strip()
+    return events, meet_title, image_paths
 
-            key = (event_number, gender, age_group, stroke)
-            if key not in seen:
-                seen.add(key)
-                events.append({
-                    "Event #": event_number,
-                    "Gender": gender,
-                    "Age Group": age_group,
-                    "Distance": None,  # Distance parsing optional
-                    "Stroke": stroke,
-                    "Heats": []  # Optional: can be ignored if not extracting swimmers
-                })
 
-    print(f"📄 Parsed {len(events)} events from Microsoft PDF")
-    return events, meet_title, output_images
-
-def sanitize_for_pdf(text: str) -> str:
-    # Replace known problematic characters
-    replacements = {
-        "—": "-",       # em-dash to hyphen
-        "–": "-",       # en-dash to hyphen
-        "™": "",        # remove trademark symbol
-        "“": '"',       # curly quotes to straight
-        "”": '"',
-        "‘": "'",
-        "’": "'",
-        "…": "...",     # ellipsis
-    }
-    for bad, good in replacements.items():
-        text = text.replace(bad, good)
-
-    # Normalize and remove any remaining non-Latin-1 characters
-    return unicodedata.normalize("NFKD", text).encode("latin-1", "ignore").decode("latin-1")
+def sanitize_for_pdf(text):
+    return text.replace("—", "-").replace("™", "")
