@@ -3,7 +3,7 @@ import os
 import pytesseract
 from pdf2image import convert_from_path
 from tempfile import TemporaryDirectory
-from PIL import ImageOps
+from PIL import Image, ImageOps
 from pathlib import Path
 
 
