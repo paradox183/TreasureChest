@@ -1,6 +1,5 @@
 import re
 import os
-import cv2
 import pytesseract
 from pdf2image import convert_from_path
 from tempfile import TemporaryDirectory
