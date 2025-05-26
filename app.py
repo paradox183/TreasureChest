@@ -220,7 +220,7 @@ def fast_fishy_labels():
 
 @app.route("/combo-generator-bad", methods=["GET", "POST"])
 def combo_generator_bad():
-    # output_images = []
+    debug_images = [os.path.basename(p) for p in image_paths]
     '''
     for i, image in enumerate(images):
         image_id = uuid.uuid4().hex[:8]
