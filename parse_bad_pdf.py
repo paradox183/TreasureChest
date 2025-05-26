@@ -57,7 +57,7 @@ def extract_events_from_microsoft_pdf(pdf_path):
                             heats = int(match.group(4))
 
                             parsed = parse_event_title(title)
-                            if not parsed:
+                            if parsed is None:
                                 continue
 
                             gender, age_group, distance, stroke = parsed
