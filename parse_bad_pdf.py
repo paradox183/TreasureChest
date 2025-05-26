@@ -43,6 +43,8 @@ def extract_events_from_microsoft_pdf(pdf_path):
                         parts = line.split("Page")[0]  # Get everything before "Page"
                         title_part = parts.replace("Session Report", "").strip()
                         meet_title = sanitize_for_pdf(title_part)
+                    except Exception as e:
+                        print(f"Failed to extract title from: {line}")
 
                 if meet_title == "Unknown Meet":
                     continue
