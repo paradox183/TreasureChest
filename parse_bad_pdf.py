@@ -57,17 +57,19 @@ def extract_events_from_microsoft_pdf(pdf_path):
                             heats = int(match.group(4))
 
                             parsed = parse_event_title(title)
-                            if parsed:
-                                gender, age_group, distance, stroke = parsed
-                                events.append({
-                                    "Event #": event_id,
-                                    "Gender": gender,
-                                    "Age Group": age_group,
-                                    "Distance": distance,
-                                    "Stroke": stroke,
-                                    "Entries": entries,
-                                    "Heats": heats,
-                                })
+                            if not parsed:
+                                continue
+
+                            gender, age_group, distance, stroke = parsed
+                            events.append({
+                                "Event #": event_id,
+                                "Gender": gender,
+                                "Age Group": age_group,
+                                "Distance": distance,
+                                "Stroke": stroke,
+                                "Entries": entries,
+                                "Heats": heats,
+                            })
                         except ValueError:
                             continue
 
