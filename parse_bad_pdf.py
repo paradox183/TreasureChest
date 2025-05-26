@@ -58,6 +58,7 @@ def extract_events_from_microsoft_pdf(pdf_path):
 
                             parsed = parse_event_title(title)
                             if parsed is None:
+                                print(f"Could not parse title: '{title}'")
                                 continue
 
                             gender, age_group, distance, stroke = parsed
