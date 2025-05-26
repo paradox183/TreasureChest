@@ -47,6 +47,9 @@ def extract_events_from_microsoft_pdf(pdf_path):
                     meet_title = line
                     continue
 
+                line = line.strip();
+                line = re.sub(r"^[^\w\d]*", "", line)  # Remove any leading non-alphanumeric characters
+
                 if meet_title != "Unknown Meet":
                     match = re.match(r"^(\d+)\s+(.+?)\s+(\d+)\s+(\d+)\s+\d{1,2}:\d{2}\s+[AP]M", line, re.IGNORECASE)
                     if match:
