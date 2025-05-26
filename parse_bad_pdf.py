@@ -26,6 +26,8 @@ def extract_events_from_microsoft_pdf(pdf_path):
             gray = ImageOps.grayscale(image_pil)
             text = pytesseract.image_to_string(gray)
 
+            print(f"\n--- OCR TEXT FROM {image_filename} ---\n{text}\n")
+
             # Extract meet title if found
             if "Session Report" in text:
                 match = re.search(r"Session Report\s+(.*?)\s+Page", text, re.DOTALL)
