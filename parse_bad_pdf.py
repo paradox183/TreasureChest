@@ -24,7 +24,7 @@ def extract_events_from_microsoft_pdf(pdf_path):
             # Convert image to grayscale for better OCR results
             image_pil = Image.open(image_filename)
             gray = ImageOps.grayscale(image_pil)
-            text = pytesseract.image_to_string(gray)
+            text = pytesseract.image_to_string(gray, config="--psm 6")
 
             print(f"\n--- OCR TEXT FROM {image_filename} ---\n{text}\n")
 
