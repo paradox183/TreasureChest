@@ -40,35 +40,36 @@ def extract_events_from_microsoft_pdf(pdf_path):
             # Look for event blocks
             current_event = None
             for line in text.splitlines():
-                event_match = event_pattern.match(line.strip())
-
                 if not line:
                     continue
 
-                if not re.match(r"^\d+\s+(Mixed|Boys|Girls|Men|Women)\s", line):
+                if meet_title == "Unknown Meet" and re.search(r"20\d{2}", line):
+                    meet_title = line
                     continue
 
-                # Sanitize to remove unsupported characters
-                line = sanitize_for_pdf(line)
+                if meet_title != "Unknown Meet":
+                    match = re.match(r"^(\d+)\s+(.+?)\s+(\d+)\s+(\d+)\s+\d{1,2}:\d{2}\s+[AP]M", line, re.IGNORECASE)
+                    if match:
+                        try:
+                            event_id = int(match.group(1))
+                            title = match.group(2).strip()
+                            entries = int(match.group(3))
+                            heats = int(match.group(4))
 
-                if event_match and meet_title != "Unknown Meet":
-                    event_id = int(match.group(1))
-                    title = match.group(2).strip()
-                    entries = int(match.group(3))
-                    heats = int(match.group(4))
-
-                    parsed = parse_event_title(title)
-                    if parsed:
-                        gender, age_group, distance, stroke = parsed
-                        events.append({
-                            "Event #": event_id,
-                            "Gender": gender,
-                            "Age Group": age_group,
-                            "Distance": distance,
-                            "Stroke": stroke,
-                            "Entries": entries,
-                            "Heats": heats,
-                        })
+                            parsed = parse_event_title(title)
+                            if parsed:
+                                gender, age_group, distance, stroke = parsed
+                                events.append({
+                                    "Event #": event_id,
+                                    "Gender": gender,
+                                    "Age Group": age_group,
+                                    "Distance": distance,
+                                    "Stroke": stroke,
+                                    "Entries": entries,
+                                    "Heats": heats,
+                                })
+                        except ValueError:
+                            continue
 
                     events.append(current_event)
 
