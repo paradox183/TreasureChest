@@ -277,7 +277,7 @@ def combo_generator_bad():
         "combo_bad.html",
         events=events,
         meet_title=meet_title,
-        output_images=output_images)
+        debug_images=debug_images)
 
 @app.route("/download/<filename>")
 def download(filename):

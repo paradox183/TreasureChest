@@ -75,7 +75,7 @@ def extract_events_from_microsoft_pdf(pdf_path):
                 })
 
     print(f"📄 Parsed {len(events)} events from Microsoft PDF")
-    return events, meet_title
+    return events, meet_title, output_images
 
 def sanitize_for_pdf(text: str) -> str:
     # Replace known problematic characters
