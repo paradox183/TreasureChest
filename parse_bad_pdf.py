@@ -31,6 +31,7 @@ def extract_events_from_microsoft_pdf(pdf_path):
         image_path = output_dir / filename
         image.save(image_path)
         output_images.append(str(image_path))
+        print("Saved image:", image_path)
 
     return [], "Unknown Meet Title", output_images
 
