@@ -38,11 +38,11 @@ def extract_events_from_microsoft_pdf(pdf_path):
                     continue
 
                 # Try to extract meet title if not already found
-                if meet_title == "Unknown Meet" and "20" in line:
-                    if re.search(r"20\d{2}", line):
-                        print(f"Meet title identified: '{line}'")
-                        meet_title = sanitize_for_pdf(line)
-                        continue
+                if line.startswith("Session Report") and "Page" in line:
+                    try:
+                        parts = line.split("Page")[0]  # Get everything before "Page"
+                        title_part = parts.replace("Session Report", "").strip()
+                        meet_title = sanitize_for_pdf(title_part)
 
                 if meet_title == "Unknown Meet":
                     continue
