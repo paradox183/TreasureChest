@@ -58,7 +58,7 @@ def extract_events_from_microsoft_pdf(pdf_path):
                     entries = int(match.group(3))
                     heats = int(match.group(4))
 
-                    desc_match = re.match(r"(Mixed|Girls|Boys|Women|Men)\s+(\d{1,2}(?:-\d{1,2})?)\s+(\d{2,3})yd\s+(.*)", description, re.IGNORECASE)
+                    desc_match = re.match(r"^(\d+)\s+(Mixed|Girls|Boys|Women|Men)\s+(.+)\s+(\d+)\s+(\d+)\s+\d{1,2}:\d{2}", description, re.IGNORECASE)
                     if not desc_match:
                         print(f"Could not parse title: '{description}'")
                         continue
