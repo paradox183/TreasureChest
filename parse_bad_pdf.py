@@ -30,7 +30,9 @@ def extract_events_from_microsoft_pdf(pdf_path):
 
             print(f"\n--- OCR TEXT FROM {image_filename} ---\n{text}\n")
 
-            event_pattern = re.compile(r"^(\d+)\s+(.+?)\s+(\d+)\s+(\d+)\s+\d{1,2}:\d{2}\s+[AP]M", re.IGNORECASE)
+            event_pattern = re.compile(
+                r"^(\d+)\s+(Mixed|Girls|Boys|Women|Men)\s+((?:\d{1,2}\s*&\s*Under)|(?:\d{1,2}-\d{1,2})|(?:\d{1,2}))\s+(\d{2,4}yd)\s+([\w\s]+?)\s+(\d+)\s+(\d+)"
+            )
 
             for line in text.splitlines():
                 line = line.strip()
