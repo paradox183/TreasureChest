@@ -53,7 +53,7 @@ def extract_events_from_microsoft_pdf(pdf_path):
 
                 match = event_pattern.match(line)
                 if match:
-                    event_number = int(match.group(1))
+                    event_number = match.group(1)
                     description = match.group(2)
                     entries = int(match.group(3))
                     heats = int(match.group(4))
