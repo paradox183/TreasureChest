@@ -171,7 +171,7 @@ def evaluate_all_events(events, lanes, aggressiveness):
             row["Can Combine?"] = "No"
             row["Reason"] = "Too many remainder swimmers"
         elif r1 < aggressiveness or r2 < aggressiveness:
-            row["can Combine?"] = "No"
+            row["Can Combine?"] = "No"
             row["Reason"] = "Combo strategy too conservative"
         else:
             row["Can Combine?"] = "Yes"
