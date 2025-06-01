@@ -125,7 +125,7 @@ def find_combinable_pairs(events, lanes=6, aggressiveness=1):
 
     return pairs
 
-def evaluate_all_events(events, lanes):
+def evaluate_all_events(events, lanes, aggressiveness):
     result = []
     used_male_ids = set()
 
@@ -138,7 +138,7 @@ def evaluate_all_events(events, lanes):
         # Only female events initiate a combo
         if e1["Gender"] not in ("Girls", "Women"):
             row["Can Combine?"] = ""
-            row["Why Not?"] = ""
+            row["Reason"] = ""
             result.append(row)
             continue
 
@@ -154,7 +154,7 @@ def evaluate_all_events(events, lanes):
 
         if not matching:
             row["Can Combine?"] = "No"
-            row["Why Not?"] = "No male counterpart"
+            row["Reason"] = "No male counterpart"
             result.append(row)
             continue
 
@@ -163,16 +163,19 @@ def evaluate_all_events(events, lanes):
 
         if e1["Entries"] < 1 or matching["Entries"] < 1:
             row["Can Combine?"] = "No"
-            row["Why Not?"] = "One event has 0 entries"
+            row["Reason"] = "One event has 0 entries"
         elif r1 == 0 or r2 == 0:
             row["Can Combine?"] = "No"
-            row["Why Not?"] = "One event fills all lanes"
+            row["Reason"] = "One event fills all lanes"
         elif r1 + r2 > lanes:
             row["Can Combine?"] = "No"
-            row["Why Not?"] = "Too many remainder swimmers"
+            row["Reason"] = "Too many remainder swimmers"
+        elif r1 < aggressiveness or r2 < aggressiveness:
+            row["can Combine?"] = "No"
+            row["Reason"] = "Combo strategy too conservative"
         else:
             row["Can Combine?"] = "Yes"
-            row["Why Not?"] = ""
+            row["Reason"] = f"{r1} swimmers"
             used_male_ids.add(matching["Event #"])
 
             # Append female row first
@@ -181,7 +184,7 @@ def evaluate_all_events(events, lanes):
             # Now insert a silent highlight flag in male row (not shown in table)
             male_row = matching.copy()
             male_row["Can Combine?"] = ""
-            male_row["Why Not?"] = ""
+            male_row["Reason"] = f"{r2} swimmers"
             male_row["_highlight_partner"] = True  # internal only
             result.append(male_row)
             continue

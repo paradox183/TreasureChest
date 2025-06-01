@@ -44,7 +44,7 @@ def combo_generator():
             uploaded_file.save(filepath)
 
             events, meet_title = extract_events_from_pdf(filepath)
-            table = evaluate_all_events(events, lanes)
+            table = evaluate_all_events(events, lanes, aggressiveness)
 
             csv_path = os.path.join(UPLOAD_FOLDER, f"combo_{timestamp}.csv")
             pdf_path = os.path.join(UPLOAD_FOLDER, f"combo_{timestamp}.pdf")
