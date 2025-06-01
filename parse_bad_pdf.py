@@ -56,10 +56,10 @@ def extract_events_from_microsoft_pdf(pdf_path):
                     event_number = match.group(1)
                     description = match.group(2)
 
-                    group3 = match.group(3);
-                    group4 = match.group(4);
+                    group3 = match.group(3)
+                    group4 = match.group(4)
 
-                    if not group3.isdigit() or not group4.isdigit()
+                    if not group3.isdigit() or not group4.isdigit():
                         continue
 
                     entries = int(match.group(3))
