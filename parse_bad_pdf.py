@@ -31,7 +31,14 @@ def extract_events_from_microsoft_pdf(pdf_path):
             print(f"\n--- OCR TEXT FROM {image_filename} ---\n{text}\n")
 
             event_pattern = re.compile(
-                r"^(\d+)\s+(Mixed|Girls|Boys|Women|Men)\s+((?:\d{1,2}\s*&\s*Under)|(?:\d{1,2}-\d{1,2})|(?:\d{1,2}))\s+(\d{2,4}yd)\s+([\w\s]+?)\s+(\d+)\s+(\d+)"
+                r"^(\d+)\s+"                             # Event number
+                r"(Mixed|Girls|Boys|Women|Men)\s+"       # Gender
+                r"([\d&\s\-Uunder]+)\s+"                 # Age group (e.g. 6 & Under, 9-10, etc.)
+                r"(\d{2,4}yd)\s+"                        # Distance (e.g. 100yd)
+                r"([\w\s]+?)\s+"                         # Stroke (e.g. Freestyle Relay)
+                r"(\d+)\s+"                              # Entries
+                r"(\d+)\s+"                              # Heats
+                r"\d{1,2}:\d{2}\s*(AM|PM)?"              # Time (optional match, ignored)
             )
 
             for line in text.splitlines():
@@ -54,26 +61,22 @@ def extract_events_from_microsoft_pdf(pdf_path):
                 match = event_pattern.match(line)
                 if match:
                     event_number = match.group(1)
-                    description = match.group(2)
+                    gender = match.group(2)
+                    age_group = match.group(3).strip()
+                    distance = match.group(4)
+                    stroke = match.group(5)
+                    entries = int(match.group(6))
+                    heats = int(match.group(7))
 
-                    group3 = match.group(3)
-                    group4 = match.group(4)
+                    #desc_match = re.match(r"^(\d+)\s+(Mixed|Girls|Boys|Women|Men)\s+(.+)\s+(\d+)\s+(\d+)\s+\d{1,2}:\d{2}", description, re.IGNORECASE)
+                    #if not desc_match:
+                    #    print(f"Could not parse title: '{description}'")
+                    #    continue
 
-                    if not group3.isdigit() or not group4.isdigit():
-                        continue
-
-                    entries = int(match.group(3))
-                    heats = int(match.group(4))
-
-                    desc_match = re.match(r"^(\d+)\s+(Mixed|Girls|Boys|Women|Men)\s+(.+)\s+(\d+)\s+(\d+)\s+\d{1,2}:\d{2}", description, re.IGNORECASE)
-                    if not desc_match:
-                        print(f"Could not parse title: '{description}'")
-                        continue
-
-                    gender = desc_match.group(1).capitalize()
-                    age_group = desc_match.group(2)
-                    distance = desc_match.group(3)
-                    stroke = desc_match.group(4).strip()
+                    #gender = desc_match.group(1).capitalize()
+                    #age_group = desc_match.group(2)
+                    #distance = desc_match.group(3)
+                    #stroke = desc_match.group(4).strip()
 
                     events.append({
                         "Event #": event_number,
