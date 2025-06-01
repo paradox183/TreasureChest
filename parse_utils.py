@@ -78,7 +78,7 @@ def extract_events_from_pdf(pdf_path):
 
     if not events:
         events, meet_title = extract_events_from_bad_pdf(pdf_path)
-    else:
+    if not events:
         events, meet_title = extract_events_from_microsoft_pdf(pdf_path)
 
 
