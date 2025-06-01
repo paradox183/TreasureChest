@@ -38,6 +38,13 @@
         <option value="{{ l }}" {% if lanes == l %}selected{% endif %}>{{ l }}</option>
         {% endfor %}
     </select></p>
+    <p><label for="aggressiveness">Combo Strategy:</label>
+        <select name="aggressiveness" id="aggressiveness">
+            <option value="1" selected>Aggressive (1+ swimmer per combined heat)</option>
+            <option value="2">Neutral (2+ swimmers per combined heat)</option>
+            <option value="3">Conservative (3+ swimmers per combined heat)</option>
+        </select>
+    </p>
     <p><button type="submit">Generate combos</button></p>
 </form>
 

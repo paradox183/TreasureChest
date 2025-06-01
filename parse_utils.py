@@ -84,7 +84,7 @@ def extract_events_from_pdf(pdf_path):
 
     return events, meet_title
 
-def find_combinable_pairs(events, lanes=6):
+def find_combinable_pairs(events, lanes=6, aggressiveness):
     pairs = []
     for i, e1 in enumerate(events):
         if e1["Gender"] not in ("Girls", "Women") or e1["Entries"] < 1:
@@ -105,6 +105,8 @@ def find_combinable_pairs(events, lanes=6):
                 if r1 == 0 or r2 == 0:
                     continue
                 if r1 + r2 > lanes:
+                    continue
+                if r1 < aggressiveness or r2 < aggressiveness:
                     continue
 
                 pairs.append({
