@@ -25,14 +25,21 @@
 <body>
 <h2>Event Combo Generator</h2>
 <p>
-    Use Chrome or Firefox to export a session report from Meet Maestro.<br>
-    (Settings -> Reports -> Session Report -> Print -> Save to PDF)<br>
-    <u>Do not</u> use Edge, Safari, or the "Microsoft Print to PDF" printer.
+    Export a session report from Meet Maestro. (In a Maestro meet, click Settings -> Reports -> Session Report)<br>
+    Select the number of lanes for your pool.<br>
+    Choose your preferred combo strategy.  More aggressive = more combos.<br>
+    <br>
+    Works with:
+    <ul>
+        <li>Print -> "Save to PDF" in Chrome, Firefox, and Edge</li>
+        <li>"Microsoft Print to PDF" printer (Windows 10/11)</li>
+    </ul>
+   If you get no results after uploading, try a different method of exporting the PDF.
 </p>
 <form action="/combo-generator" method="post" enctype="multipart/form-data">
-    <p><label for="pdf">PDF File:</label>
+    <p><label for="pdf">Session Report PDF:</label>
     <input type="file" name="pdf" accept=".pdf" required></p>
-   <p><label for="lanes">Lanes:</label>
+   <p><label for="lanes">Pool Lanes:</label>
     <select name="lanes" required>
         {% for l in range(4, 9) %}
         <option value="{{ l }}" {% if lanes == l %}selected{% endif %}>{{ l }}</option>
