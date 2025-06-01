@@ -11,6 +11,10 @@
             border-collapse: collapse;
             padding: 4px;
         }
+        table.noborder, th.noborder, td.noborder {
+            border: none;
+            border-collapse: collapse;
+        }
         th {
             background: #eee;
         }
@@ -37,21 +41,40 @@
    If you get no results after uploading, try a different method of exporting the PDF.
 </p>
 <form action="/combo-generator" method="post" enctype="multipart/form-data">
-    <p><label for="pdf">Session Report PDF:</label>
-    <input type="file" name="pdf" accept=".pdf" required></p>
-   <p><label for="lanes">Pool Lanes:</label>
-    <select name="lanes" required>
-        {% for l in range(4, 9) %}
-        <option value="{{ l }}" {% if lanes == l %}selected{% endif %}>{{ l }}</option>
-        {% endfor %}
-    </select></p>
-    <p><label for="aggressiveness">Combo Strategy:</label>
-        <select name="aggressiveness" id="aggressiveness">
-            <option value="1" selected>Aggressive (1+ swimmer per combined heat)</option>
-            <option value="2">Neutral (2+ swimmers per combined heat)</option>
-            <option value="3">Conservative (3+ swimmers per combined heat)</option>
-        </select>
-    </p>
+    <table class="noborder">
+        <tr class="noborder">
+            <td class="noborder">
+                <label for="pdf">Session Report PDF:</label>
+            </td>
+            <td class="noborder">
+                <input type="file" name="pdf" accept=".pdf" required>
+            </td>
+        </tr>
+        <tr class="noborder">
+            <td class="noborder">
+                <label for="lanes">Pool Lanes:</label>
+            </td>
+            <td class="noborder">
+                <select name="lanes" required>
+                    {% for l in range(4, 9) %}
+                    <option value="{{ l }}" {% if lanes == l %}selected{% endif %}>{{ l }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr class="noborder">
+            <td class="noborder">
+                <label for="aggressiveness">Combo Strategy:</label>
+            </td>
+            <td class="noborder">
+                <select name="aggressiveness" id="aggressiveness">
+                    <option value="1" selected>Aggressive (1+ swimmer per combined heat)</option>
+                    <option value="2">Neutral (2+ swimmers per combined heat)</option>
+                    <option value="3">Conservative (3+ swimmers per combined heat)</option>
+                </select>
+            </td>
+        </tr>
+    </table>
     <p><button type="submit">Generate combos</button></p>
 </form>
 
