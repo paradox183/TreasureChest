@@ -221,6 +221,8 @@ def fast_fishy_labels():
 @app.route("/combo-generator-bad", methods=["GET", "POST"])
 def combo_generator_bad():
     debug_images = []
+    events = []
+    meet_title = "Unknown Meet"
     '''
     for i, image in enumerate(images):
         image_id = uuid.uuid4().hex[:8]
