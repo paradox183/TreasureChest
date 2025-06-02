@@ -124,6 +124,7 @@ def time_improvement_labels():
     meet_options = []
     selected_meet = ""
     csv_path = ""
+    generated_labels = []
 
     if request.method == "POST":
         if "report" in request.files:
@@ -155,7 +156,6 @@ def time_improvement_labels():
 
             # added for new combined report
             report_types = request.form.getlist("report_types")
-            generated_labels = []
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
             # old code for time improvement ONLY
