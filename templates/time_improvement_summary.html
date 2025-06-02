@@ -1,0 +1,24 @@
+<div class="label-preview">
+    <table>
+        <thead>
+        <tr>
+            <th>Swimmer</th>
+            <th>Event</th>
+            <th>Previous Best</th>
+            <th>Meet Date</th>
+            <th>Meet Title</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for label in label_data %}
+        <tr>
+            <td>{{ label[0] }}</td>
+            <td>{{ label[1] }}</td>
+            <td>{{ label[2] }}</td>
+            <td>{{ label[3] }}</td>
+            <td>{{ label[4] }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -31,23 +31,45 @@
 {% elif meet_options %}
 <form action="/time-improvement-labels" method="post">
     <input type="hidden" name="csv_path" value="{{ csv_path }}">
+    <div>
+        <label><input checked="" name="report_types" type="checkbox" value="time_improvement"/> Time Improvement</label><br/>
+        <label><input checked="" name="report_types" type="checkbox" value="triple_drop"/> Triple Drop</label><br/>
+        <label><input checked="" name="report_types" type="checkbox" value="fast_fishy"/> Fast Fishy</label>
+    </div>
     <label for="meet">Select Meet:</label>
     <select name="meet" required>
         {% for meet in meet_options %}
-        <option value="{{ meet[0] }}">{{ meet[1] }}</option>
+        <option value="{{ meet[0] }}"{% if loop.last %} selected{% endif %}>{{ meet[1] }}</option>
         {% endfor %}
     </select>
     <button type="submit">Generate Labels</button>
 </form>
 {% endif %}
 
+<!-- old code for time improvement ONLY
 {% if label_data %}
-<h3>Generated Labels ({{ label_data|length }})</h3>
-
+<h3>Labels ({{ label_data|length }})</h3>
 <p>
     <a href="{{ url_for('download', filename=label_filename) }}">Download PDF Labels</a>
 </p>
+-->
 
+{% if generated_labels %}
+<h3>Label Downloads:</h3>
+<ul>
+    {% for label_type, filename, _ in generated_labels %}
+    <li><a href="{{ url_for('static', filename='generated/' + filename) }}" target="_blank">{{ label_type }} Labels (PDF)</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% for label_type, _, _, html in generated_labels %}
+<hr>
+<h3>{{ label_type }} Summary</h3>
+    {{ html | safe }}
+{% endfor %}
+
+<!-- old code for time improvement ONLY
 <div class="label-preview">
     <table>
         <thead>
@@ -72,6 +94,7 @@
         </tbody>
     </table>
 </div>
+-->
 {% endif %}
 </body>
 </html>

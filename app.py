@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for
+from flask import Flask, render_template, request, send_file, redirect, url_for, render_template_string
+from jinja2 import Template
 import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -149,22 +150,62 @@ def time_improvement_labels():
             # Step 2: User selected a meet
             selected_meet = request.form["meet"]
             csv_path = os.path.join(UPLOAD_FOLDER, request.form["csv_path"])
-            label_data = generate_time_improvement_labels(csv_path, selected_meet)
+            # old code for time improvement ONLY
+            #label_data = generate_time_improvement_labels(csv_path, selected_meet)
 
-            if label_data:
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                label_filename = f"time_improvement_{timestamp}.pdf"
-                output_path = os.path.join(UPLOAD_FOLDER, label_filename)
-                render_label_pdf(label_data, output_path)
+            # added for new combined report
+            report_types = request.form.getlist("report_types")
+            generated_labels = []
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+            # old code for time improvement ONLY
+            #if label_data:
+            #    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            #    label_filename = f"time_improvement_{timestamp}.pdf"
+            #    output_path = os.path.join(UPLOAD_FOLDER, label_filename)
+            #    render_label_pdf(label_data, output_path)
+
+            if "time_improvement" in report_types:
+                ti_data = generate_time_improvement_labels(csv_path, selected_meet)
+                ti_filename = f"time_improvement_{timestamp}.pdf"
+                ti_path = os.path.join(UPLOAD_FOLDER, ti_filename)
+                render_label_pdf(ti_data, ti_path)
+
+                with open("templates/time_improvement_summary.html") as f:
+                    ti_template = Template(f.read())
+                    ti_html = ti_template.render(label_data=ti_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
+                generated_labels.append(("Time Improvement", ti_filename, ti_data, ti_html))
+
+            if "triple_drop" in report_types:
+                td_data = generate_triple_drop_labels(csv_path, selected_meet)
+                td_filename = f"triple_drop_{timestamp}.pdf"
+                td_path = os.path.join(UPLOAD_FOLDER, td_filename)
+                render_label_pdf(td_data, td_path)
+                with open("templates/triple_drop_summary.html") as f:
+                    ti_template = Template(f.read())
+                    ti_html = ti_template.render(label_data=ti_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
+                generated_labels.append(("Triple Drop", td_filename, td_data, ti_html))
+
+            if "fast_fishy" in report_types:
+                ff_data = generate_fast_fishy_labels(csv_path, selected_meet)
+                ff_filename = f"fast_fishy_{timestamp}.pdf"
+                ff_path = os.path.join(UPLOAD_FOLDER, ff_filename)
+                render_label_pdf(ff_data, ff_path)
+
+                with open("templates/fast_fishy_summary.html") as f:
+                    ti_template = Template(f.read())
+                    ti_html = ti_template.render(label_data=ti_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
+                generated_labels.append(("Fast Fishy", ff_filename, ff_data, ti_html))
 
     return render_template(
         "time_improvement.html",
         meet_options=[],
-        label_data=label_data,
-        label_filename=label_filename,
+        #label_data=label_data,
+        #label_filename=label_filename,
         selected_meet=selected_meet,
         csv_uploaded=False,
-        csv_path=""
+        csv_path="",
+        generated_labels=generated_labels
     )
 
 @app.route("/fast-fishy-labels", methods=["GET", "POST"])
