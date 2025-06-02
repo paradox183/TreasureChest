@@ -193,7 +193,7 @@ def time_improvement_labels():
                 ff_labels, ff_df, ff_rankings = generate_fast_fishy_labels(csv_path, selected_meet)
                 render_label_pdf(ff_labels, ff_path)
 
-                ff_html = render_template("partials/fast_fishy_summary.html", label_data=ff_labels)
+                ff_html = render_template("fast_fishy_summary.html", label_data=ff_labels)
 
 
                 #with open("templates/fast_fishy_summary.html") as f:

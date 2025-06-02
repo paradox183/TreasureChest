@@ -25,23 +25,23 @@
 {% if not csv_uploaded %}
 <form action="/time-improvement-labels" method="post" enctype="multipart/form-data">
     <label for="report">Upload Report CSV:</label>
-    <input type="file" name="report" accept=".csv" required>
+    <input type="file" name="report" accept=".csv" required><br>
     <button type="submit">Upload CSV</button>
 </form>
 {% elif meet_options %}
 <form action="/time-improvement-labels" method="post">
     <input type="hidden" name="csv_path" value="{{ csv_path }}">
-    <div>
-        <label><input checked="" name="report_types" type="checkbox" value="time_improvement"/> Time Improvement</label><br/>
-        <label><input checked="" name="report_types" type="checkbox" value="triple_drop"/> Triple Drop</label><br/>
-        <label><input checked="" name="report_types" type="checkbox" value="fast_fishy"/> Fast Fishy</label>
-    </div>
     <label for="meet">Select Meet:</label>
     <select name="meet" required>
         {% for meet in meet_options %}
         <option value="{{ meet[0] }}"{% if loop.last %} selected{% endif %}>{{ meet[1] }}</option>
         {% endfor %}
     </select>
+    <div>
+        <label><input checked="" name="report_types" type="checkbox" value="time_improvement"/> Time Improvement</label><br/>
+        <label><input checked="" name="report_types" type="checkbox" value="triple_drop"/> Triple Drop</label><br/>
+        <label><input checked="" name="report_types" type="checkbox" value="fast_fishy"/> Fast Fishy</label>
+    </div><br>
     <button type="submit">Generate Labels</button>
 </form>
 {% endif %}
