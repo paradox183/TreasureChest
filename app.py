@@ -182,20 +182,25 @@ def time_improvement_labels():
                 td_path = os.path.join(UPLOAD_FOLDER, td_filename)
                 render_label_pdf(td_data, td_path)
                 with open("templates/triple_drop_summary.html") as f:
-                    ti_template = Template(f.read())
-                    ti_html = ti_template.render(label_data=ti_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
-                generated_labels.append(("Triple Drop", td_filename, td_data, ti_html))
+                    td_template = Template(f.read())
+                    td_html = td_template.render(label_data=ti_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
+                generated_labels.append(("Triple Drop", td_filename, td_data, td_html))
 
             if "fast_fishy" in report_types:
-                ff_data = generate_fast_fishy_labels(csv_path, selected_meet)
+                #ff_data = generate_fast_fishy_labels(csv_path, selected_meet)
                 ff_filename = f"fast_fishy_{timestamp}.pdf"
                 ff_path = os.path.join(UPLOAD_FOLDER, ff_filename)
-                render_label_pdf(ff_data, ff_path)
+                ff_labels, ff_df, ff_rankings = generate_fast_fishy_labels(csv_path, selected_meet)
+                render_label_pdf(ff_labels, ff_path)
 
-                with open("templates/fast_fishy_summary.html") as f:
-                    ti_template = Template(f.read())
-                    ti_html = ti_template.render(label_data=ti_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
-                generated_labels.append(("Fast Fishy", ff_filename, ff_data, ti_html))
+                ff_html = render_template("templates/fast_fishy_summary.html", label_data=ff_labels)
+
+
+                #with open("templates/fast_fishy_summary.html") as f:
+                #    ff_template = Template(f.read())
+                #    ti_html = ti_template.render(label_data=ti_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
+
+                generated_labels.append(("Fast Fishy", ff_filename, ff_labels, ff_html))
 
     return render_template(
         "time_improvement.html",
