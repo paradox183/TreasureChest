@@ -208,6 +208,8 @@ def time_improvement_labels():
     if not generated_labels:
         generated_labels = [["TEST", "Label", "To", "Ensure", "Visible"]]
 
+    print(generated_labels)
+
     return render_template(
         "time_improvement.html",
         meet_options=[],
