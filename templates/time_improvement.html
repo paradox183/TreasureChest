@@ -20,6 +20,9 @@
     </style>
 </head>
 <body>
+<p style="color:red">CSV Uploaded: {{ csv_uploaded }}</p>
+<p style="color:red">Generated labels: {{ generated_labels | length }}</p>
+
 <h2>Time Improvement Label Generator</h2>
 
 {% if not csv_uploaded %}
