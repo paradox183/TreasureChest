@@ -55,6 +55,7 @@
 -->
 
 {% if generated_labels %}
+<p>Length: {{ generated_labels | length}}</p>
 <h3>Label Downloads:</h3>
 <ul>
     {% for label_type, filename, _ in generated_labels %}
