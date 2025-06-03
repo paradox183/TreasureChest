@@ -205,6 +205,9 @@ def time_improvement_labels():
 
                 generated_labels.append(("Fast Fishy", ff_filename, ff_labels, ff_html))
 
+    if not generated_labels:
+        labels = [["TEST", "Label", "To", "Ensure", "Visible"]]
+
     return render_template(
         "time_improvement.html",
         meet_options=[],
