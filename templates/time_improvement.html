@@ -65,7 +65,6 @@
     <li><a href="{{ url_for('static', filename='generated/' + filename) }}" target="_blank">{{ label_type }} Labels (PDF)</a></li>
     {% endfor %}
 </ul>
-{% endif %}
 
 {% for label_type, _, _, html in generated_labels %}
 <hr>
