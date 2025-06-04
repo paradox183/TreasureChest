@@ -12,6 +12,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from fpdf import FPDF
 from fpdf.enums import XPos, YPos
+from weasyprint import HTML
 
 from parse_bad_pdf import sanitize_for_pdf
 
@@ -476,3 +477,6 @@ def sanitize_for_pdf(text: str) -> str:
 
     # Normalize and remove any remaining non-Latin-1 characters
     return unicodedata.normalize("NFKD", text).encode("latin-1", "ignore").decode("latin-1")
+
+def save_html_as_pdf(html_content, output_path):
+    HTML(string=html_content).write_pdf(output_path)

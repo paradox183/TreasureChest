@@ -49,8 +49,9 @@
 {% if generated_labels %}
 <h3>Downloads:</h3>
 <ul>
-    {% for label_type, filename, _, _ in generated_labels %}
-    <li>{{ label_type }}: <a href="{{ url_for('static', filename='generated/' + filename) }}" target="_blank"> Labels (PDF)</a></li>
+    {% for label_type, filename, _, _, report_pdf in generated_labels %}
+    <li>{{ label_type }}: <a href="{{ url_for('static', filename='generated/' + filename) }}" target="_blank"> Labels (PDF)</a> |
+        <a href="{{ url_for('static', filename='generated/' + report_pdf) }}" target="_blank"> Report (PDF)</a></li>
     {% endfor %}
 </ul>
 

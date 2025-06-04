@@ -6,3 +6,4 @@ gunicorn
 pytesseract
 pdf2image
 Pillow
+weasyprint==65.1

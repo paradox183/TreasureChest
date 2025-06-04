@@ -9,7 +9,8 @@ from parse_utils import (
     find_combinable_pairs,
     export_pairs_to_pdf,
     export_pairs_to_csv,
-    sanitize_for_pdf
+    sanitize_for_pdf,
+    save_html_as_pdf
 )
 from parse_bad_pdf import extract_events_from_microsoft_pdf
 from generate_triple_drop_labels import generate_triple_drop_labels, extract_meets_with_times
@@ -174,7 +175,9 @@ def time_improvement_labels():
                 with open("templates/time_improvement_summary.html") as f:
                     ti_template = Template(f.read())
                     ti_html = ti_template.render(label_data=ti_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
-                generated_labels.append(("Time Improvement", ti_filename, ti_data, ti_html))
+                ti_report_pdf = f"time_improvement_report_{timestamp}.pdf"
+                ti_report_path = os.path.join(UPLOAD_FOLDER, ti_report_pdf)
+                generated_labels.append(("Time Improvement", ti_filename, ti_data, ti_html, ti_report_path))
 
             if "triple_drop" in report_types:
                 td_data = generate_triple_drop_labels(csv_path, selected_meet)
@@ -184,7 +187,9 @@ def time_improvement_labels():
                 with open("templates/triple_drop_summary.html") as f:
                     td_template = Template(f.read())
                     td_html = td_template.render(label_data=td_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
-                generated_labels.append(("Triple Drop", td_filename, td_data, td_html))
+                td_report_pdf = f"triple_drop_report_{timestamp}.pdf"
+                td_report_path = os.path.join(UPLOAD_FOLDER, td_report_pdf)
+                generated_labels.append(("Triple Drop", td_filename, td_data, td_html, td_report_path))
 
             if "fast_fishy" in report_types:
                 #ff_data = generate_fast_fishy_labels(csv_path, selected_meet)
@@ -200,7 +205,9 @@ def time_improvement_labels():
                 #    ff_template = Template(f.read())
                 #    ti_html = ti_template.render(label_data=ti_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
 
-                generated_labels.append(("Fast Fishy", ff_filename, ff_labels, ff_html))
+                ff_report_pdf = f"fast_fishy_report_{timestamp}.pdf"
+                ff_report_path = os.path.join(UPLOAD_FOLDER, ff_report_pdf)
+                generated_labels.append(("Fast Fishy", ff_filename, ff_labels, ff_html, ff_report_path))
 
     if not generated_labels:
         generated_labels = [["TEST", "Label", "To", "Ensure", "Visible"]]
