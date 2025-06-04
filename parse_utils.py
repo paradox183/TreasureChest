@@ -479,4 +479,5 @@ def sanitize_for_pdf(text: str) -> str:
     return unicodedata.normalize("NFKD", text).encode("latin-1", "ignore").decode("latin-1")
 
 def save_html_as_pdf(html_content, output_path):
+    html_content = "<style>body { font-family: Arial, sans-serif; font-size: 10pt; } th, td { border: 1px solid #888; padding: 6px; text-align: left; } th { background-color: #f0f0f0; } </style>" + html_content
     HTML(string=html_content).write_pdf(output_path)
