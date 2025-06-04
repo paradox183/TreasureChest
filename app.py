@@ -167,7 +167,6 @@ def time_improvement_labels():
 
             if "time_improvement" in report_types:
                 ti_data = generate_time_improvement_labels(csv_path, selected_meet)
-                print("TI labels:", ti_data[:3])
                 ti_filename = f"time_improvement_{timestamp}.pdf"
                 ti_path = os.path.join(UPLOAD_FOLDER, ti_filename)
                 render_label_pdf(ti_data, ti_path)
@@ -179,13 +178,12 @@ def time_improvement_labels():
 
             if "triple_drop" in report_types:
                 td_data = generate_triple_drop_labels(csv_path, selected_meet)
-                print("TD labels:", td_data[:3])
                 td_filename = f"triple_drop_{timestamp}.pdf"
                 td_path = os.path.join(UPLOAD_FOLDER, td_filename)
                 render_label_pdf(td_data, td_path)
                 with open("templates/triple_drop_summary.html") as f:
                     td_template = Template(f.read())
-                    td_html = td_template.render(label_data=ti_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
+                    td_html = td_template.render(label_data=td_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
                 generated_labels.append(("Triple Drop", td_filename, td_data, td_html))
 
             if "fast_fishy" in report_types:
@@ -193,7 +191,6 @@ def time_improvement_labels():
                 ff_filename = f"fast_fishy_{timestamp}.pdf"
                 ff_path = os.path.join(UPLOAD_FOLDER, ff_filename)
                 ff_labels, ff_df, ff_rankings = generate_fast_fishy_labels(csv_path, selected_meet)
-                print("FF labels:", ff_labels[:3])
                 render_label_pdf(ff_labels, ff_path)
 
                 ff_html = render_template("fast_fishy_summary.html", label_data=ff_labels)

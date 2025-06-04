@@ -20,9 +20,6 @@
     </style>
 </head>
 <body>
-<p style="color:red">CSV Uploaded: {{ csv_uploaded }}</p>
-<p style="color:red">Generated labels: {{ generated_labels | length }}</p>
-
 <h2>Time Improvement Label Generator</h2>
 
 {% if not csv_uploaded %}
@@ -50,11 +47,10 @@
 {% endif %}
 
 {% if generated_labels %}
-<p>Length: {{ generated_labels | length}}</p>
-<h3>Label Downloads:</h3>
+<h3>Downloads:</h3>
 <ul>
     {% for label_type, filename, _, _ in generated_labels %}
-    <li><a href="{{ url_for('static', filename='generated/' + filename) }}" target="_blank">{{ label_type }} Labels (PDF)</a></li>
+    <li>{{ label_type }}: <a href="{{ url_for('static', filename='generated/' + filename) }}" target="_blank"> Labels (PDF)</a></li>
     {% endfor %}
 </ul>
 
