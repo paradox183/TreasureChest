@@ -61,7 +61,7 @@
 <p>Length: {{ generated_labels | length}}</p>
 <h3>Label Downloads:</h3>
 <ul>
-    {% for label_type, filename, _ in generated_labels %}
+    {% for label_type, filename, _, _ in generated_labels %}
     <li><a href="{{ url_for('static', filename='generated/' + filename) }}" target="_blank">{{ label_type }} Labels (PDF)</a></li>
     {% endfor %}
 </ul>
