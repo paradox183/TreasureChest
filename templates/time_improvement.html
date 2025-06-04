@@ -20,8 +20,11 @@
     </style>
 </head>
 <body>
-<h2>Time Improvement Label Generator</h2>
-
+<h2>Time Improvement Awards</h2>
+<p>Export an Athlete Report Card from Swimtopia and save as CSV.<br>
+(Manage Team -> Reports -> Athlete Report Card)<br>
+Choose season, all categories, all ages; Short Course Yards;<br>
+Include results for unofficial meets (important!)</p>
 {% if not csv_uploaded %}
 <form action="/time-improvement-labels" method="post" enctype="multipart/form-data">
     <label for="report">Upload Report CSV:</label>
@@ -37,6 +40,7 @@
         <option value="{{ meet[0] }}"{% if loop.last %} selected{% endif %}>{{ meet[1] }}</option>
         {% endfor %}
     </select>
+    <br>
     <div>
         <label><input checked="" name="report_types" type="checkbox" value="time_improvement"/> Time Improvement</label><br/>
         <label><input checked="" name="report_types" type="checkbox" value="triple_drop"/> Triple Drop</label><br/>
