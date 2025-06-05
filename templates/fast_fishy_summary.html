@@ -4,6 +4,7 @@
         margin: 1in;
     }
 </style>
+<h3>Fast Fishy Award<br>{{ label_data[0][5] }}</h3>
 <div class="label-preview">
     <table>
         <thead>
@@ -28,3 +29,22 @@
         </tbody>
     </table>
 </div>
+
+<h3>Full Rankings by Age Group</h3>
+
+{% for age, swimmers in rankings.items() %}
+<h4>Age Group: {{ age }}</h4>
+<table>
+    <thead>
+    <tr><th>Swimmer</th><th>Total Drop</th></tr>
+    </thead>
+    <tbody>
+    {% for swimmer in swimmers %}
+    <tr>
+        <td>{{ swimmer.name }}</td>
+        <td>{{ swimmer.drop }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
