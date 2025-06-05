@@ -61,7 +61,6 @@ Include results for unofficial meets (important!)</p>
 
 {% for label_type, _, _, html, _ in generated_labels %}
 <hr>
-<h3>{{ label_type }} Summary</h3>
     {{ html | safe }}
 {% endfor %}
 {% endif %}

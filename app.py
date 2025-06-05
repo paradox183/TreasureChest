@@ -170,11 +170,12 @@ def time_improvement_labels():
                 ti_data = generate_time_improvement_labels(csv_path, selected_meet)
                 ti_filename = f"time_improvement_{timestamp}.pdf"
                 ti_path = os.path.join(UPLOAD_FOLDER, ti_filename)
+                meet_title = ti_data[0][4] + " - " + ti_data[0][3] if ti_data else ""
                 render_label_pdf(ti_data, ti_path)
 
                 with open("templates/time_improvement_summary.html") as f:
                     ti_template = Template(f.read())
-                    ti_html = ti_template.render(label_data=ti_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
+                    ti_html = ti_template.render(label_data=ti_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet, meet_title=meet_title)
                 ti_report_pdf = f"time_improvement_report_{timestamp}.pdf"
                 ti_report_path = os.path.join(UPLOAD_FOLDER, ti_report_pdf)
                 save_html_as_pdf(ti_html, ti_report_path)
@@ -184,10 +185,11 @@ def time_improvement_labels():
                 td_data = generate_triple_drop_labels(csv_path, selected_meet)
                 td_filename = f"triple_drop_{timestamp}.pdf"
                 td_path = os.path.join(UPLOAD_FOLDER, td_filename)
+                meet_title = td_data[0][4] + " - " + td_data[0][3] if td_data else ""
                 render_label_pdf(td_data, td_path)
                 with open("templates/triple_drop_summary.html") as f:
                     td_template = Template(f.read())
-                    td_html = td_template.render(label_data=td_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet)
+                    td_html = td_template.render(label_data=td_data, csv_uploaded=False, meet_options=[], selected_meet=selected_meet, meet_title=meet_title)
                 td_report_pdf = f"triple_drop_report_{timestamp}.pdf"
                 td_report_path = os.path.join(UPLOAD_FOLDER, td_report_pdf)
                 save_html_as_pdf(td_html, td_report_path)
@@ -199,8 +201,9 @@ def time_improvement_labels():
                 ff_path = os.path.join(UPLOAD_FOLDER, ff_filename)
                 ff_labels, ff_df, ff_rankings = generate_fast_fishy_labels(csv_path, selected_meet)
                 render_label_pdf(ff_labels, ff_path)
+                meet_title = ff_labels[0][4] + " - " + ff_labels[0][3] if ff_labels else ""
 
-                ff_html = render_template("fast_fishy_summary.html", label_data=ff_labels, rankings=ff_rankings)
+                ff_html = render_template("fast_fishy_summary.html", label_data=ff_labels, rankings=ff_rankings, meet_title=meet_title)
 
 
                 #with open("templates/fast_fishy_summary.html") as f:
