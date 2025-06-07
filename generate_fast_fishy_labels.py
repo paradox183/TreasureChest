@@ -70,8 +70,8 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
                 except:
                     continue
 
-        if best_sec is None:
-            continue
+            if best_sec is None:
+                continue
 
         drop = best_sec - new_sec
         if drop > 0:
