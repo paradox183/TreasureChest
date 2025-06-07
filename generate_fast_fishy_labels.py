@@ -53,32 +53,37 @@ def generate_fast_fishy_labels(report_csv_path, target_meet):
             if not row.get(improved_col):
                 continue
 
-            # Must have prior time
-            has_prior = False
-            for m in reversed(earlier_meets):
-                prev_col = f"{m}-Result"
-                if prev_col in df.columns and pd.notna(row.get(prev_col)):
-                    has_prior = True
-                    break
-            if not has_prior:
-                continue
-
             try:
-                prev_sec = parse_seconds(row[prev_col])
                 new_sec = parse_seconds(row[result_col])
-                drop = prev_sec - new_sec
-                if drop > 0:
-                    drops.append({
-                        "swimmer": row["LastName_FirstName"],
-                        "last": row["LastName"],
-                        "first": row["FirstName"],
-                        "age": row.get("AgeGroup", "").strip(),
-                        "drop": drop,
-                        "date": row[date_col],
-                        "meet": row[name_col]
-                    })
             except:
                 continue
+
+        # Find best prior time across all earlier meets
+        best_sec = None
+        for m in earlier_meets:
+            prev_col = f"{m}-Result"
+            if prev_col in df.columns and pd.notna(row.get(prev_col)):
+                try:
+                   prev_sec = parse_seconds(row[prev_col])
+                   if best_sec is None or prev_sec < best_sec:
+                       best_sec = prev_sec
+                except:
+                    continue
+
+        if best_sec is None:
+            continue
+
+        drop = best_sec - new_sec
+        if drop > 0:
+            drops.append({
+                "swimmer": row["LastName_FirstName"],
+                "last": row["LastName"],
+                "first": row["FirstName"],
+                "age": row.get("AgeGroup", "").strip(),
+                "drop": drop,
+                "date": row[date_col],
+                "meet": row[name_col]
+            })
 
         df_drops = pd.DataFrame(drops)
         if "age" not in df_drops.columns:
