@@ -1,4 +1,4 @@
-
+import math
 import pandas as pd
 
 def calculate_time_drop(prev, new):
@@ -54,6 +54,14 @@ def generate_time_improvement_labels(report_csv_path, target_meet):
 
     improved_df = df[df[improved_col] == True]
 
+    # Identify all meet numbers
+    meet_nums = sorted(
+        {col.split("-")[0] for col in df.columns if col.endswith("-Result")},
+        key=lambda x: int(x.replace("Meet", ""))
+    )
+
+    earlier_meets = [m for m in meet_nums if m < target_meet]
+
     for _, row in improved_df.iterrows():
         swimmer = f"{row['LastName']}, {row['FirstName']}"
         event_name = f"{row['EventDistance']} {row['EventStroke']}".strip()
@@ -61,21 +69,29 @@ def generate_time_improvement_labels(report_csv_path, target_meet):
         meet_date = row[date_col]
         meet_name = row[name_col]
 
-        # Find previous best time
-        prev_time = None
-        for col in df.columns:
-            if col.startswith("Meet") and col.endswith("-Result"):
-                if target_meet in col:
-                    break
+        best_time_val = None
+        best_time_str = None
+
+        for m in earlier_meets:
+            col = f"{m}-Result"
+            if col in df.columns:
                 val = row.get(col)
                 if pd.notna(val):
-                    prev_time = clean_time(val)
+                    try:
+                        t = clean_time(val)
+                        t_sec = float(t.split(":")[0]) * 60 + float(t.split(":")[1]) if ":" in t else float(t)
+                        if best_time_val is None or t_sec < best_time_val:
+                            best_time_val = t_sec
+                            best_time_str = t
+                    except:
+                        continue
 
-        if prev_time:
+        if best_time_str:
+            drop_str = calculate_time_drop(best_time_str, new_time)
             labels.append([
                 swimmer,
                 event_name,
-                f"Previous best: {prev_time} ({calculate_time_drop(prev_time, new_time)})",
+                f"Previous best: {best_time_str} ({drop_str})",
                 meet_date,
                 meet_name
             ])
