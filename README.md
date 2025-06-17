@@ -38,6 +38,10 @@ Triple Drop is awarded to every swimmer that improves time in three individual e
 
 The Fast Fishy is the swimmer in each age/gender group with the highest cumulative time improvement.  This is NOT a net calculation and only factors in time improvements; for example, if a swimmer improves 3 seconds in one event and 4 seconds in another event, but adds 2 seconds in their third event, this is counted as a -7, not a -5.  Additionally, if a swimmer is a repeat winner they are labeled as such, and the next eligible swimmer that isn't also a repeat winner gets the award as well.  Produces one label per swimmer.
 
+# Try it for yourself
+
+See the code in action at https://armada.chestercharge.com.  Feel free to use it in situ if it meets your team's needs.
+
 # Why Python?
 
 I originally wanted to do this in Node.js, but I started with the combo generator and had all manner of issues getting Node libraries to parse the session report.  Python had more obvious turnkey solutions, so here we are.
